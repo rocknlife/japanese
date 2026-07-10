@@ -49,15 +49,22 @@ export function useMasteredKanas() {
 }
 
 export function useNotionConfig() {
-  const defaultConfig: NotionConfig = {
-    apiKey: "",
-    dbId: "",
+  // Fallback to env vars when localStorage has no saved config
+  const envDefault: NotionConfig = {
+    apiKey: process.env.NEXT_PUBLIC_NOTION_API_KEY ?? "",
+    dbId: process.env.NEXT_PUBLIC_NOTION_DB_ID ?? "",
   };
 
-  const [notionConfig, setNotionConfig] = useState<NotionConfig>(defaultConfig);
+  const [notionConfig, setNotionConfig] = useState<NotionConfig>(envDefault);
 
   useEffect(() => {
-    setNotionConfig(getLS<NotionConfig>("notionConfig", defaultConfig));
+    const saved = getLS<NotionConfig | null>("notionConfig", null);
+    // Use saved config only if it actually has values; otherwise fall back to env
+    if (saved && (saved.apiKey || saved.dbId)) {
+      setNotionConfig(saved);
+    } else {
+      setNotionConfig(envDefault);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -67,9 +74,12 @@ export function useNotionConfig() {
   }, []);
 
   const clear = useCallback(() => {
-    const reset: NotionConfig = { apiKey: "", dbId: "" };
-    setNotionConfig(reset);
+    // Remove localStorage and fall back to env vars
     localStorage.removeItem("notionConfig");
+    setNotionConfig({
+      apiKey: process.env.NEXT_PUBLIC_NOTION_API_KEY ?? "",
+      dbId: process.env.NEXT_PUBLIC_NOTION_DB_ID ?? "",
+    });
   }, []);
 
   return { notionConfig, save, clear };
