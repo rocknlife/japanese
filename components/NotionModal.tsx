@@ -89,6 +89,32 @@ export default function NotionModal({
               설정 전이나 빈 값일 경우 로컬 시뮬레이션 모드로 동작합니다.
             </p>
           </div>
+          {/* Current connection status */}
+          {(config.apiKey || config.dbId) && (
+            <div className="bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2.5 space-y-1.5">
+              <p className="text-[10px] font-bold text-emerald-700 flex items-center gap-1">
+                <i className="fa-solid fa-circle-check text-emerald-500"></i>
+                현재 연결된 Notion 계정
+              </p>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wide w-14 shrink-0">API Key</span>
+                  <span className="text-[10px] font-mono text-slate-600 truncate">
+                    {config.apiKey
+                      ? config.apiKey.slice(0, 14) + "..." + config.apiKey.slice(-4)
+                      : "-"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wide w-14 shrink-0">DB ID</span>
+                  <span className="text-[10px] font-mono text-slate-600 truncate">
+                    {config.dbId || "-"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="space-y-3 text-xs border-t border-slate-100 pt-3">
             <div>
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">
