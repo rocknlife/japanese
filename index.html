@@ -1,0 +1,2438 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오이시이 일본어 - 맛있는 일본어 공부방 & 스마트 출석부</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font & Nanum Pen Script for Asian touch -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans JP', 'Malgun Gothic', sans-serif;
+        }
+        .japanese-font {
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+        /* Custom scrollbar for beautiful card lists */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col selection:bg-rose-100 selection:text-rose-700 overflow-x-hidden">
+
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-rose-100 shadow-sm transition-all duration-300">
+        <div class="max-w-6xl mx-auto px-4 py-3.5 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('chart')">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-500 to-orange-400 flex items-center justify-center text-white shadow-md shadow-rose-200 shrink-0">
+                    <span class="text-xl font-black">お</span>
+                </div>
+                <div>
+                    <h1 class="text-sm md:text-base font-black bg-gradient-to-r from-rose-600 to-orange-500 bg-clip-text text-transparent flex flex-col leading-none py-0.5">
+                        <span>오이시이</span>
+                        <span class="mt-0.5">일본어</span>
+                    </h1>
+                    <p class="text-[8px] text-slate-400 uppercase tracking-wider mt-0.5">Delicious Japanese</p>
+                </div>
+            </div>
+
+            <!-- Main Navigation Tabs -->
+            <nav class="hidden md:flex items-center space-x-1" id="desktop-nav-menu">
+                <button onclick="switchTab('chart')" id="nav-chart" class="px-3.5 py-2 rounded-xl text-xs font-semibold transition-all duration-200 text-rose-600 bg-rose-50">
+                    <i class="fa-solid fa-table-cells mr-1.5"></i>문자학습
+                </button>
+                <button onclick="switchTab('food')" id="nav-food" class="px-3.5 py-2 rounded-xl text-xs font-semibold transition-all duration-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50/50">
+                    <i class="fa-solid fa-utensils mr-1.5"></i>단어장
+                </button>
+                <button onclick="switchTab('drawing')" id="nav-drawing" class="px-3.5 py-2 rounded-xl text-xs font-semibold transition-all duration-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50/50">
+                    <i class="fa-solid fa-pen-nib mr-1.5"></i>따라쓰기
+                </button>
+                <button onclick="switchTab('quiz')" id="nav-quiz" class="px-3.5 py-2 rounded-xl text-xs font-semibold transition-all duration-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50/50">
+                    <i class="fa-solid fa-gamepad mr-1.5"></i>퀴즈
+                </button>
+                <button onclick="switchTab('notice')" id="nav-notice" class="px-3.5 py-2 rounded-xl text-xs font-semibold transition-all duration-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50/50">
+                    <i class="fa-solid fa-clipboard-list mr-1.5"></i>알림장
+                </button>
+                <button onclick="switchTab('attendance')" id="nav-attendance" class="px-3.5 py-2 rounded-xl text-xs font-semibold transition-all duration-200 text-slate-600 hover:text-rose-600 hover:bg-rose-50/50">
+                    <i class="fa-solid fa-calendar-check mr-1.5"></i>출석부
+                </button>
+            </nav>
+
+            <!-- Indicators -->
+            <div class="flex items-center space-x-2">
+                <div class="bg-rose-50 border border-rose-100 px-2.5 py-1.5 rounded-xl text-[10px] flex items-center shadow-sm shrink-0">
+                    <i class="fa-solid fa-graduation-cap text-rose-500 mr-1.5"></i>
+                    <span class="font-bold text-slate-700">마스터: <span id="mastered-count" class="text-rose-600 font-black">0</span>/104</span>
+                </div>
+                <button onclick="openNotionConfigModal()" class="p-2 text-rose-500 hover:text-rose-600 rounded-xl bg-rose-50/80 hover:bg-rose-50 transition shrink-0" title="Notion API 연동 설정">
+                    <i id="notion-connection-indicator" class="fa-solid fa-network-wired text-sm text-amber-500 animate-pulse"></i>
+                </button>
+                <button onclick="openSettingsModal()" class="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 transition shrink-0">
+                    <i class="fa-solid fa-circle-info text-base"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN INTERACTIVE CONTAINER WRAPPER -->
+    <div class="w-full flex-grow py-6 bg-slate-50">
+        
+        <!-- Main Content Container Grid -->
+        <main class="max-w-6xl w-full mx-auto px-4 overflow-y-auto">
+            
+            <!-- ==================== TAB 1: KANA STUDY CHART ==================== -->
+            <section id="tab-chart" class="space-y-4">
+                <!-- Selector Header -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                    <div>
+                        <h2 class="text-base md:text-lg font-black text-slate-800 flex items-center">
+                            <span class="w-2.5 h-5 bg-rose-500 rounded-full mr-2"></span>
+                            문자 학습판 (かな表)
+                        </h2>
+                        <p class="text-[10px] md:text-xs text-slate-500 mt-0.5">글자를 탭하여 완벽한 발음과 자필 획순 가이드를 확인해 보세요.</p>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-2 items-center">
+                        <!-- Script Toggle (Hiragana vs Katakana) -->
+                        <div class="bg-slate-100 p-1 rounded-xl flex">
+                            <button id="btn-hiragana" onclick="setScriptType('hiragana')" class="px-3 py-1.5 text-[10px] md:text-xs font-bold rounded-lg shadow-sm transition bg-white text-rose-600">
+                                히라가나 (あ)
+                            </button>
+                            <button id="btn-katakana" onclick="setScriptType('katakana')" class="px-3 py-1.5 text-[10px] md:text-xs font-bold rounded-lg transition text-slate-500 hover:text-slate-800">
+                                가타카나 (ア)
+                            </button>
+                        </div>
+
+                        <!-- Category Filter (Gojuuon, Dakuon, Yoon) -->
+                        <div class="bg-slate-100 p-1 rounded-xl flex">
+                            <button id="btn-cat-basic" onclick="setKanaCategory('basic')" class="px-2.5 py-1.5 text-[10px] md:text-xs font-medium rounded-lg shadow-sm transition bg-white text-slate-800">
+                                오십음
+                            </button>
+                            <button id="btn-cat-voiced" onclick="setKanaCategory('voiced')" class="px-2.5 py-1.5 text-[10px] md:text-xs font-medium rounded-lg transition text-slate-500 hover:text-slate-800">
+                                탁/반탁
+                            </button>
+                            <button id="btn-cat-yoon" onclick="setKanaCategory('yoon')" class="px-2.5 py-1.5 text-[10px] md:text-xs font-medium rounded-lg transition text-slate-500 hover:text-slate-800">
+                                요음
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Layout Grid (5-Column Japanese Standard Layout with labels) -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                    <!-- Left Section: Letters Matrix -->
+                    <div class="lg:col-span-8 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
+                        <!-- Matrix Headers (Vowels Indicator) -->
+                        <div class="grid grid-cols-5 gap-2 mb-2 text-center text-[10px] font-bold text-slate-400">
+                            <div>A (あ단)</div>
+                            <div>I (い단)</div>
+                            <div>U (う단)</div>
+                            <div>E (え단)</div>
+                            <div>O (お단)</div>
+                        </div>
+
+                        <!-- Dynamic letters load -->
+                        <div id="kana-matrix-container" class="grid grid-cols-5 gap-2">
+                            <!-- Instantiated dynamically by Javascript -->
+                        </div>
+
+                        <!-- Visual Legend/Guide Info -->
+                        <div class="mt-4 pt-3 border-t border-dashed border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
+                            <span class="flex items-center"><span class="w-2.5 h-2.5 bg-rose-500 rounded-full mr-1.5"></span>터치하여 원어민 소리 듣기</span>
+                            <span class="flex items-center"><span class="w-2.5 h-2.5 border border-slate-200 bg-slate-50 rounded mr-1.5"></span>빈 칸은 없는 발음입니다</span>
+                        </div>
+                    </div>
+
+                    <!-- Right Section: Desktop Trace Card / Container -->
+                    <div class="lg:col-span-4 flex flex-col gap-4" id="desktop-detail-sidebar">
+                        <div id="character-detail-panel" class="bg-gradient-to-b from-rose-50/40 to-orange-50/30 p-5 rounded-2xl border border-rose-100 shadow-sm flex flex-col items-center text-center">
+                            <!-- Top Action Row -->
+                            <div class="w-full flex justify-between items-center mb-3">
+                                <span class="text-[10px] bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold" id="detail-script-type">히라가나</span>
+                                <button id="btn-toggle-bookmark-kana" onclick="toggleKanaMastery()" class="p-2 bg-white/85 hover:bg-white rounded-full text-slate-400 hover:text-rose-500 shadow-sm transition">
+                                    <i class="fa-regular fa-bookmark text-base" id="kana-mastery-icon"></i>
+                                </button>
+                            </div>
+
+                            <!-- Active Large Character Display & Audio Triggers -->
+                            <div class="relative group my-1">
+                                <div class="absolute -inset-1 rounded-full bg-gradient-to-r from-rose-400 to-orange-300 opacity-20 blur transition duration-300"></div>
+                                <div class="relative w-24 h-24 bg-white rounded-2xl shadow-sm border border-rose-100 flex items-center justify-center cursor-pointer" onclick="speakCurrentKana()">
+                                    <span class="text-5xl font-extrabold text-slate-800 japanese-font" id="detail-big-kana">あ</span>
+                                    <span class="absolute bottom-1 right-2 text-slate-300"><i class="fa-solid fa-volume-high text-xs"></i></span>
+                                </div>
+                            </div>
+
+                            <!-- Romanized pronunciation, stroke info -->
+                            <div class="mt-2">
+                                <h3 class="text-xl font-bold text-rose-600 japanese-font" id="detail-romaji">a</h3>
+                                <p class="text-[10px] text-slate-400" id="detail-stroke-text">획수: 3획 | 한국어 발음: '아'</p>
+                            </div>
+
+                            <!-- Mini Trace Canvas Area -->
+                            <div class="w-full bg-white rounded-xl border border-orange-100 p-2 mt-3 shadow-inner relative">
+                                <div class="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
+                                    <span class="text-8xl font-black font-serif select-none japanese-font" id="canvas-guideline">あ</span>
+                                </div>
+                                <canvas id="mini-draw-canvas" class="w-full h-28 bg-transparent relative z-10 cursor-crosshair rounded-lg"></canvas>
+                                <div class="flex justify-between items-center mt-1.5 relative z-20">
+                                    <span class="text-[9px] text-slate-400"><i class="fa-solid fa-info-circle mr-1"></i>마우스/터치로 획을 그리세요</span>
+                                    <button onclick="clearMiniCanvas()" class="px-2 py-0.5 text-[9px] bg-slate-100 hover:bg-slate-200 text-slate-600 rounded transition font-bold">
+                                        지우기
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Highlight Food Connector Card (Linked word) -->
+                        <div id="linked-food-card" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-[10px] font-bold text-slate-400">연상 단어 (일식)</span>
+                                    <span class="text-[9px] bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded-full" id="linked-food-tag">🍧 디저트</span>
+                                </div>
+
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-xl shrink-0" id="linked-food-emoji">
+                                        🍬
+                                    </div>
+                                    <div class="flex-grow">
+                                        <h4 class="text-base font-bold text-slate-800 tracking-wide japanese-font" id="linked-food-kana">
+                                            <span class="text-rose-500 font-extrabold">あ</span>め
+                                        </h4>
+                                        <div class="flex items-center space-x-2 text-[10px] text-slate-500 mt-0.5">
+                                            <span id="linked-food-romaji" class="font-bold text-slate-700">ame</span>
+                                            <span>•</span>
+                                            <span id="linked-food-meaning">사탕</span>
+                                        </div>
+                                    </div>
+                                    <button onclick="speakText(document.getElementById('linked-food-kana').innerText)" class="p-2 bg-rose-50 hover:bg-rose-100 text-rose-500 rounded-lg transition shrink-0">
+                                        <i class="fa-solid fa-volume-high text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Example Sentence Box -->
+                            <div class="mt-3 pt-3 border-t border-dashed border-slate-100 bg-slate-50/50 p-2.5 rounded-xl">
+                                <div class="flex justify-between items-start gap-1">
+                                    <div>
+                                        <p class="text-[9px] font-bold text-slate-400 mb-1">한눈에 읽는 예문</p>
+                                        <p class="text-xs font-bold text-slate-800 tracking-wide japanese-font" id="linked-sentence-ja">
+                                            あまいあめをたべます。
+                                        </p>
+                                        <p class="text-[10px] text-slate-500 mt-0.5" id="linked-sentence-ko">
+                                            달콤한 사탕을 먹습니다.
+                                        </p>
+                                    </div>
+                                    <button onclick="speakText(document.getElementById('linked-sentence-ja').innerText)" class="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-white rounded transition shrink-0">
+                                        <i class="fa-solid fa-volume-high text-[10px]"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== TAB 2: JAPANESE FOOD VOCABULARY ==================== -->
+            <section id="tab-food" class="hidden space-y-4">
+                <!-- Header Panel -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
+                    <div>
+                        <h2 class="text-base md:text-lg font-black text-slate-800 flex items-center">
+                            <span class="w-2.5 h-5 bg-orange-500 rounded-full mr-2"></span>
+                            맛있는 일식 단어장 (美味しい日本の食べ물)
+                        </h2>
+                        <p class="text-[10px] md:text-xs text-slate-500 mt-0.5">일본 음식 단어로 배우는 어휘! 모음/자음별로 글자가 포함된 단어를 연상해서 맛있게 학습해보세요.</p>
+                    </div>
+                    <div class="flex overflow-x-auto pb-1 md:pb-0 gap-1.5 max-w-full scrollbar-thin shrink-0">
+                        <button id="btn-food-filter-all" onclick="filterFoodCards('all')" class="px-3 py-1.5 bg-orange-500 text-white rounded-lg text-[10px] md:text-xs font-bold shadow-sm transition shrink-0">전체보기</button>
+                        <button id="btn-food-filter-vowel" onclick="filterFoodCards('vowel')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-[10px] md:text-xs font-bold transition shrink-0">모음 (あ단)</button>
+                        <button id="btn-food-filter-consonant" onclick="filterFoodCards('consonant')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-[10px] md:text-xs font-bold transition shrink-0">자음별 단어</button>
+                    </div>
+                </div>
+
+                <!-- Dynamic Card List of Foods -->
+                <div id="food-cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Programmatically populated by JS -->
+                </div>
+            </section>
+
+            <!-- ==================== TAB 3: FULL SCREEN WRITING PRACTICE ==================== -->
+            <section id="tab-drawing" class="hidden space-y-4">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                    <!-- Draw configuration & list of characters -->
+                    <div class="lg:col-span-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-3">
+                        <div>
+                            <h2 class="text-base md:text-lg font-black text-slate-800 flex items-center">
+                                <span class="w-2.5 h-5 bg-teal-500 rounded-full mr-2"></span>
+                                따라 쓰기 연습장
+                            </h2>
+                            <p class="text-[10px] md:text-xs text-slate-500 mt-0.5">직접 실감나는 칠판 가이드를 따라 획순에 맞춰 일본어를 써보며 외워보세요.</p>
+                        </div>
+
+                        <!-- Quick Letters Selector for Canvas -->
+                        <div class="space-y-1.5">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">학습 문자 설정</label>
+                            <div class="flex gap-2">
+                                <select id="draw-select-script" onchange="updateDrawCharOptions()" class="w-1/2 p-2 text-xs border border-slate-200 rounded-xl bg-white outline-none focus:border-teal-500">
+                                    <option value="hiragana">히라가나</option>
+                                    <option value="katakana">가타카나</option>
+                                </select>
+                                <select id="draw-select-char" onchange="selectDrawCharacter()" class="w-1/2 p-2 text-xs border border-slate-200 rounded-xl bg-white outline-none font-bold japanese-font">
+                                    <!-- Options populated dynamic -->
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Card details with tips -->
+                        <div class="bg-teal-50/50 border border-teal-100 rounded-xl p-3.5 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-teal-800" id="draw-info-type">히라가나 [あ]</span>
+                                <span class="text-[10px] bg-white text-teal-700 px-2.5 py-0.5 rounded-full border border-teal-100 font-bold shadow-sm" id="draw-info-strokes">3 획</span>
+                            </div>
+                            <p class="text-xs text-slate-600 leading-relaxed">
+                                <i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i>
+                                <span id="draw-instruction-tip">첫 번째 가로 획은 부드럽게 긋고, 세 번째 획은 시계방향 회전하여 마무리해 주세요.</span>
+                            </p>
+                        </div>
+
+                        <!-- Audio play / Speak character -->
+                        <button onclick="speakText(document.getElementById('draw-select-char').value)" class="w-full py-2.5 bg-teal-50 hover:bg-teal-100 text-teal-700 font-bold rounded-xl transition flex items-center justify-center space-x-2 text-xs border border-teal-100 shadow-sm">
+                            <i class="fa-solid fa-volume-high text-xs"></i>
+                            <span>정확한 발음 듣기</span>
+                        </button>
+                    </div>
+
+                    <!-- Big Board Canvas Area -->
+                    <div class="lg:col-span-8 bg-slate-900 rounded-2xl p-4 shadow-md flex flex-col justify-between relative overflow-hidden min-h-[380px]">
+                        <div class="absolute inset-0 bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:16px_16px] opacity-30"></div>
+                        
+                        <!-- Canvas Toolbar Header -->
+                        <div class="flex justify-between items-center relative z-10 mb-3 pb-3 border-b border-slate-800">
+                            <div class="flex items-center space-x-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span class="text-[10px] font-bold text-slate-300">디지털 칠판 (Tracing Board)</span>
+                            </div>
+                            <!-- Canvas Control Buttons -->
+                            <div class="flex items-center space-x-1.5">
+                                <button onclick="changeDrawColor('#ffffff')" class="color-btn w-5 h-5 rounded-full border-2 border-white bg-white shadow-sm" title="하얀색 분필"></button>
+                                <button onclick="changeDrawColor('#fb7185')" class="color-btn w-5 h-5 rounded-full border border-slate-800 bg-rose-400" title="핑크 분필"></button>
+                                <button onclick="changeDrawColor('#38bdf8')" class="color-btn w-5 h-5 rounded-full border border-slate-800 bg-sky-400" title="하늘색 분필"></button>
+                                <span class="w-[1px] h-4 bg-slate-800 mx-1"></span>
+                                <button onclick="clearBigCanvas()" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition text-[10px] flex items-center space-x-1">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                    <span>지우기</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Trace Grid Body -->
+                        <div class="relative flex-grow flex items-center justify-center bg-slate-950/85 rounded-xl border border-slate-800 p-2 min-h-[250px]">
+                            <!-- Huge Guideline in background -->
+                            <div class="absolute inset-0 flex items-center justify-center opacity-[0.06] pointer-events-none select-none z-0">
+                                <span class="text-[200px] font-bold font-serif japanese-font text-white" id="big-canvas-guideline">あ</span>
+                            </div>
+                            <div class="absolute inset-x-0 top-1/2 border-t border-dashed border-slate-800/40 pointer-events-none"></div>
+                            <div class="absolute inset-y-0 left-1/2 border-l border-dashed border-slate-800/40 pointer-events-none"></div>
+
+                            <!-- Main Canvas Draw Frame -->
+                            <canvas id="big-draw-canvas" class="w-full h-64 bg-transparent relative z-10 cursor-crosshair touch-none"></canvas>
+                        </div>
+
+                        <!-- Canvas Footer Tips -->
+                        <div class="flex justify-between items-center text-[10px] text-slate-500 mt-2 relative z-10">
+                            <span><i class="fa-solid fa-circle-question mr-1"></i>손가락이나 마우스로 자유롭게 그리세요.</span>
+                            <span>선 굵기: <span class="text-teal-400 font-bold">5px</span></span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== TAB 4: INTERACTIVE QUIZ STATION ==================== -->
+            <section id="tab-quiz" class="hidden space-y-4">
+                <!-- Starting Panel (Intro) -->
+                <div id="quiz-start-panel" class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm max-w-xl mx-auto text-center space-y-5 relative overflow-hidden">
+                    <div class="w-14 h-14 bg-gradient-to-tr from-rose-500 to-orange-400 text-white rounded-2xl flex items-center justify-center text-2xl mx-auto shadow-md">
+                        <i class="fa-solid fa-gamepad"></i>
+                    </div>
+
+                    <div class="space-y-1">
+                        <h2 class="text-lg md:text-xl font-black text-slate-800">일본어 능력 검증 퀴즈</h2>
+                        <p class="text-[11px] md:text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
+                            히라가나와 가타카나 및 배운 일식 단어를 기반으로 구성된 실전 퀴즈에 도전해보세요!
+                        </p>
+                    </div>
+
+                    <!-- Choose Category -->
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 text-left space-y-2">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">퀴즈 타입 선택</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <button onclick="selectQuizType('kana_to_romaji')" id="btn-quiz-type-ktr" class="quiz-type-btn p-3 bg-white hover:bg-rose-50/20 border-2 border-rose-500 text-rose-700 rounded-xl text-xs font-bold transition flex items-center justify-between">
+                                <span>문자 독해 발음 맞추기</span>
+                                <i class="fa-solid fa-circle-check text-rose-500"></i>
+                            </button>
+                            <button onclick="selectQuizType('food_to_meaning')" id="btn-quiz-type-ftm" class="quiz-type-btn p-3 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-between">
+                                <span>일식 단어 한글 뜻 맞추기</span>
+                                <i class="fa-solid fa-circle-check text-slate-200"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button onclick="startQuizSession()" class="w-full py-3 bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600 text-white font-bold rounded-xl shadow transition transform active:scale-95 text-xs">
+                        게임 시작하기
+                    </button>
+                </div>
+
+                <!-- Quiz Game Session Panel -->
+                <div id="quiz-game-panel" class="hidden bg-white p-5 rounded-2xl border border-slate-100 shadow-sm max-w-xl mx-auto space-y-4">
+                    <!-- Session Header Details -->
+                    <div class="flex items-center justify-between text-[11px] text-slate-400 border-b border-slate-100 pb-2">
+                        <span class="font-bold text-slate-600">질문: <span id="quiz-curr-index" class="text-rose-500 font-black">1</span> / 5</span>
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-rose-50 text-rose-600 px-2 py-0.5 rounded-lg font-bold"><i class="fa-solid fa-heart mr-1"></i>생명 <span id="quiz-lives">3</span></span>
+                            <span class="bg-amber-50 text-amber-600 px-2 py-0.5 rounded-lg font-bold"><i class="fa-solid fa-fire mr-1"></i>점수 <span id="quiz-score">0</span></span>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                        <div id="quiz-progress-bar" class="bg-gradient-to-r from-rose-500 to-orange-500 h-full transition-all duration-300" style="width: 20%;"></div>
+                    </div>
+
+                    <!-- Big Question Display -->
+                    <div class="text-center py-6 bg-slate-50 rounded-xl border border-dashed border-slate-200 relative">
+                        <div class="absolute top-2 right-2">
+                            <button onclick="speakQuizItem()" class="p-1.5 text-slate-400 hover:text-rose-500 bg-white shadow-xs rounded-lg transition">
+                                <i class="fa-solid fa-volume-high text-xs"></i>
+                            </button>
+                        </div>
+                        <span class="text-[9px] font-black text-rose-500 uppercase tracking-widest" id="quiz-badge">KANA QUIZ</span>
+                        <h3 class="text-4xl font-extrabold text-slate-800 mt-1 tracking-wide japanese-font" id="quiz-question-txt">あ</h3>
+                        <p class="text-[11px] text-slate-500 mt-1.5" id="quiz-instruction-txt">이 글자의 올바른 로마자 발음 표기는 무엇일까요?</p>
+                    </div>
+
+                    <!-- Choices Grid (Multiple Choices) -->
+                    <div id="quiz-options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                        <!-- Standard dynamically loaded choices -->
+                    </div>
+
+                    <!-- Feedback / Skip Bar -->
+                    <div class="flex justify-between items-center text-[10px] text-slate-400 pt-1">
+                        <span><i class="fa-solid fa-info-circle mr-1"></i>정답을 고르는 즉시 정답 여부가 표기됩니다.</span>
+                        <button onclick="endQuizSession(true)" class="text-slate-400 hover:text-slate-600 underline">포기하기</button>
+                    </div>
+                </div>
+
+                <!-- Quiz Score Panel -->
+                <div id="quiz-result-panel" class="hidden bg-white p-6 rounded-2xl border border-slate-100 shadow-sm max-w-xl mx-auto text-center space-y-4">
+                    <div class="w-14 h-14 bg-gradient-to-tr from-amber-400 to-orange-500 text-white rounded-full flex items-center justify-center text-2xl mx-auto shadow-md">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+
+                    <div class="space-y-1">
+                        <h3 class="text-base font-black text-slate-800">퀴즈 완료! 고생하셨습니다 🎉</h3>
+                        <p class="text-[11px] text-slate-400" id="quiz-result-subtitle">일본어 실력이 나날이 늘어가고 있어요!</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 max-w-xs mx-auto py-1">
+                        <div class="bg-amber-50/50 p-3 rounded-xl border border-amber-100 text-center">
+                            <span class="text-[10px] font-bold text-slate-400">학습 점수</span>
+                            <p class="text-xl font-black text-amber-600 mt-0.5" id="quiz-result-score">50</p>
+                        </div>
+                        <div class="bg-rose-50/50 p-3 rounded-xl border border-rose-100 text-center">
+                            <span class="text-[10px] font-bold text-slate-400">맞춘 문항</span>
+                            <p class="text-xl font-black text-rose-600 mt-0.5" id="quiz-result-correct">5 / 5</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-2 justify-center pt-1">
+                        <button onclick="restartQuiz()" class="px-5 py-2.5 bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600 text-white font-bold rounded-lg shadow transition text-[11px] flex items-center justify-center space-x-1.5">
+                            <i class="fa-solid fa-arrows-rotate"></i>
+                            <span>다시 도전</span>
+                        </button>
+                        <button onclick="switchTab('chart')" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg transition text-[11px] flex items-center justify-center space-x-1.5">
+                            <i class="fa-solid fa-house"></i>
+                            <span>메인 홈으로</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== TAB 5: NOTICE BOARD ==================== -->
+            <section id="tab-notice" class="hidden space-y-4">
+                <!-- Header Panel -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
+                    <div>
+                        <h2 class="text-base md:text-lg font-black text-slate-800 flex items-center">
+                            <span class="w-2.5 h-5 bg-sky-500 rounded-full mr-2"></span>
+                            오이시이 알림장 (お知らせ)
+                        </h2>
+                        <p class="text-[10px] md:text-xs text-slate-500 mt-0.5">공지사항, 과제, 공유사항을 등록하고 다른 학습자들과 함께 확인해 보세요.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                    <!-- Left: Write Post Form -->
+                    <div class="lg:col-span-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-4">
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+                                <i class="fa-solid fa-pen-to-square text-sky-500"></i> 새 알림 작성
+                            </h3>
+                            <p class="text-[10px] text-slate-400 mt-0.5">카테고리와 내용을 작성하여 등록합니다.</p>
+                        </div>
+
+                        <form id="notice-registration-form" onsubmit="registerNewNotice(event)" class="space-y-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">구분 (카테고리)</label>
+                                <select id="notice-category" required class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl outline-none focus:border-sky-500 transition bg-white">
+                                    <option value="notice">📢 공지사항 (Notice)</option>
+                                    <option value="homework">📝 과제 (Homework)</option>
+                                    <option value="share">💡 공유사항 (Share)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">작성자 선택</label>
+                                <div class="flex flex-col gap-2">
+                                    <select id="notice-author-select" onchange="toggleAuthorCustomInput()" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl outline-none focus:border-sky-500 transition bg-white">
+                                        <option value="custom">✍️ 직접 입력 / 외부 작성자</option>
+                                    </select>
+                                    <input type="text" id="notice-author-custom" placeholder="작성자 이름을 입력하세요..." class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl outline-none focus:border-sky-500 transition placeholder:text-slate-300">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">내용</label>
+                                <textarea id="notice-content" rows="5" placeholder="알림 내용을 상세히 작성해 주세요..." required class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl outline-none focus:border-sky-500 transition placeholder:text-slate-300 resize-none"></textarea>
+                            </div>
+                            <button type="submit" class="w-full py-2.5 bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm active:scale-98">
+                                <i class="fa-solid fa-bullhorn"></i> 알림 등록하기
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Right: Notice List & Filters -->
+                    <div class="lg:col-span-8 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                            <h3 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+                                <i class="fa-solid fa-list-ul text-sky-500"></i> 등록된 알림 목록
+                            </h3>
+                            <!-- Categories Filter Buttons -->
+                            <div class="flex gap-1 overflow-x-auto pb-1 sm:pb-0 shrink-0">
+                                <button onclick="filterNotices('all')" id="btn-notice-filter-all" class="px-2.5 py-1.5 bg-sky-500 text-white rounded-lg text-[10px] font-bold transition">전체</button>
+                                <button onclick="filterNotices('notice')" id="btn-notice-filter-notice" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-[10px] font-bold transition">공지</button>
+                                <button onclick="filterNotices('homework')" id="btn-notice-filter-homework" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-[10px] font-bold transition">과제</button>
+                                <button onclick="filterNotices('share')" id="btn-notice-filter-share" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-[10px] font-bold transition">공유</button>
+                            </div>
+                        </div>
+
+                        <!-- Notices Cards Stream -->
+                        <div id="notices-stream-container" class="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== TAB 6: USERS & ATTENDANCE MANAGEMENT (NOTION API) ==================== -->
+            <section id="tab-attendance" class="hidden space-y-4">
+                <!-- Top Management Header & Notion Info -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
+                    <div>
+                        <h2 class="text-base md:text-lg font-black text-slate-800 flex items-center">
+                            <span class="w-2.5 h-5 bg-violet-600 rounded-full mr-2"></span>
+                            사원 등록 및 주간 통합 출석부 (Notion 연동)
+                        </h2>
+                        <p class="text-[10px] md:text-xs text-slate-500 mt-0.5">사원 정보를 등록하고, 일주일 단위의 출석 상황을 실시간 그리드로 편하게 체크하여 동기화합니다.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="openNotionConfigModal()" class="px-3 py-1.5 bg-violet-50 hover:bg-violet-100 text-violet-700 border border-violet-100 rounded-lg text-[10px] md:text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+                            <i class="fa-solid fa-sliders"></i> Notion 연동 설정
+                        </button>
+                        <button onclick="loadUsersFromNotion()" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-[10px] md:text-xs font-bold transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-rotate-right" id="btn-sync-icon"></i> 실시간 동기화
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Connection Status Banner -->
+                <div id="notion-status-banner" class="bg-amber-50 border border-amber-100 rounded-xl p-3 flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-brands fa-notion text-lg text-slate-800"></i>
+                        <div>
+                            <span class="font-bold text-slate-700">Notion 연동 대기 모드:</span>
+                            <span class="text-slate-500" id="notion-status-text">설정되지 않아 로컬 브라우저 모드로 동작 중입니다.</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <span class="w-2 h-2 rounded-full bg-amber-500" id="notion-status-light"></span>
+                        <span class="text-[10px] text-amber-700 font-bold uppercase" id="notion-status-badge">LOCAL MODE</span>
+                    </div>
+                </div>
+
+                <!-- Layout: User Registration and Attendance Board -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                    <!-- Left Panel: User Registration Form & Directory -->
+                    <div class="lg:col-span-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-4">
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+                                <i class="fa-solid fa-user-plus text-violet-600"></i> 신규 사원 등록
+                            </h3>
+                            <p class="text-[10px] text-slate-400 mt-0.5">사번과 이름을 입력하여 조직원에 신규 등록합니다.</p>
+                        </div>
+
+                        <form id="user-registration-form" onsubmit="registerNewUser(event)" class="space-y-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">사원 번호 (사번)</label>
+                                <input type="text" id="reg-emp-id" placeholder="예: EMP1024" required class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl outline-none focus:border-violet-500 transition placeholder:text-slate-300">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">이름 (성명)</label>
+                                <input type="text" id="reg-emp-name" placeholder="예: 김민준" required class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl outline-none focus:border-violet-500 transition placeholder:text-slate-300">
+                            </div>
+                            <button type="submit" class="w-full py-2.5 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm active:scale-98">
+                                <i class="fa-solid fa-floppy-disk"></i> 사원 정보 등록하기
+                            </button>
+                        </form>
+
+                        <!-- Registered User Directory -->
+                        <div class="border-t border-slate-100 pt-3 space-y-2">
+                            <div class="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase">
+                                <span>등록된 사원 일람 (<span id="total-user-count" class="text-violet-600 font-extrabold">0</span>명)</span>
+                                <span>누적 상태</span>
+                            </div>
+                            
+                            <div id="user-directory-container" class="space-y-1.5 max-h-[180px] overflow-y-auto pr-1">
+                                <!-- Dynamic User Item Cards -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel: Weekly Attendance Checklist Board (Grid Table) -->
+                    <div class="lg:col-span-8 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-4 overflow-hidden">
+                        
+                        <!-- Attendance Header Controls with Weekly Selectors -->
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-clipboard-user text-violet-600"></i> 주간 출석 체크 현황판
+                                </h3>
+                                <p class="text-[10px] text-slate-400 mt-0.5 font-bold" id="weekly-range-display">기간: 로딩 중...</p>
+                            </div>
+                            
+                            <!-- Weekly Navigation Buttons -->
+                            <div class="flex items-center gap-1">
+                                <button onclick="navigateWeek(-1)" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold rounded-xl transition">
+                                    <i class="fa-solid fa-chevron-left mr-1"></i> 이전주
+                                </button>
+                                <button onclick="navigateWeek(0)" class="px-2.5 py-1.5 bg-violet-100 hover:bg-violet-200 text-violet-700 text-[11px] font-bold rounded-xl transition">
+                                    이번주
+                                </button>
+                                <button onclick="navigateWeek(1)" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold rounded-xl transition">
+                                    다음주 <i class="fa-solid fa-chevron-right ml-1"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Weekly Table Content -->
+                        <div class="overflow-x-auto w-full border border-slate-100 rounded-xl">
+                            <table class="w-full min-w-[650px] text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-100 text-[10px] font-bold text-slate-500 uppercase">
+                                        <th class="p-3 w-[150px]">사원명 (사번)</th>
+                                        <th class="p-3 text-center text-rose-500" id="th-day-0">월</th>
+                                        <th class="p-3 text-center" id="th-day-1">화</th>
+                                        <th class="p-3 text-center" id="th-day-2">수</th>
+                                        <th class="p-3 text-center" id="th-day-3">목</th>
+                                        <th class="p-3 text-center" id="th-day-4">금</th>
+                                        <th class="p-3 text-center text-sky-600" id="th-day-5">토</th>
+                                        <th class="p-3 text-center text-rose-600" id="th-day-6">일</th>
+                                        <th class="p-3 text-center w-[90px]">주간 합계</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="weekly-attendance-tbody" class="divide-y divide-slate-100 text-xs">
+                                    <!-- Populated dynamically via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Quick Legend Box -->
+                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100 flex flex-wrap gap-4 items-center justify-center text-[10px]">
+                            <span class="text-slate-400 font-bold uppercase tracking-wider">클릭 순환 범례:</span>
+                            <div class="flex items-center space-x-1.5">
+                                <span class="w-5 h-5 rounded-lg bg-slate-100 border border-slate-200 text-slate-400 flex items-center justify-center text-[8px] font-bold"><i class="fa-solid fa-minus"></i></span>
+                                <span class="text-slate-600 font-medium">미체크 (기본)</span>
+                            </div>
+                            <div class="flex items-center space-x-1.5">
+                                <span class="w-5 h-5 rounded-lg bg-emerald-500 text-white flex items-center justify-center text-[8px] font-bold"><i class="fa-solid fa-check"></i></span>
+                                <span class="text-slate-600 font-medium">참석 (1회 클릭)</span>
+                            </div>
+                            <div class="flex items-center space-x-1.5">
+                                <span class="w-5 h-5 rounded-lg bg-rose-500 text-white flex items-center justify-center text-[8px] font-bold"><i class="fa-solid fa-xmark"></i></span>
+                                <span class="text-slate-600 font-medium">불참 (2회 클릭)</span>
+                            </div>
+                        </div>
+
+                        <!-- Save indicator / tip -->
+                        <div class="pt-2 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between text-[10px] text-slate-400 gap-2">
+                            <span><i class="fa-solid fa-shield-halved mr-1"></i>칸을 한 번 클릭하면 참석, 다시 클릭하면 불참 상태로 전환되며 자동 영구 저장됩니다.</span>
+                            <span class="text-violet-600 font-bold" id="auto-save-indicator"><i class="fa-solid fa-circle-check"></i> 실시간 자동 동기화 활성</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- App Footer -->
+        <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 py-6 mt-12" id="main-footer-section">
+            <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-3">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-xl bg-rose-500 flex items-center justify-center text-white text-sm font-bold">お</div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-200">오이시이 일본어 & 스마트 주간 출석 매니저</p>
+                        <p class="text-[8px] text-slate-500">Copyright © 2026. All rights reserved.</p>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-4 text-[10px]">
+                    <a href="#" onclick="openSettingsModal()" class="hover:text-slate-200">앱 정보</a>
+                    <a href="#" onclick="switchTab('chart')" class="hover:text-slate-200">문자학습</a>
+                    <a href="#" onclick="switchTab('attendance')" class="hover:text-slate-200">출석부</a>
+                    <a href="#" onclick="resetStudyProgress()" class="text-rose-500 hover:text-rose-400">학습 통계 초기화</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Notion Configuration Modal Popup -->
+    <div id="notion-config-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-slate-950/60 backdrop-blur-xs" onclick="closeNotionConfigModal()"></div>
+        <div class="bg-white rounded-2xl p-5 md:p-6 max-w-md w-full mx-4 shadow-2xl relative z-10 border border-slate-100 transform transition duration-200 scale-95 opacity-0" id="notion-modal-container">
+            <button onclick="closeNotionConfigModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1 bg-slate-100 rounded-full transition">
+                <i class="fa-solid fa-xmark w-4 h-4 flex items-center justify-center"></i>
+            </button>
+            <div class="space-y-4">
+                <div class="w-12 h-12 bg-violet-50 text-violet-600 rounded-xl flex items-center justify-center text-xl">
+                    <i class="fa-brands fa-notion"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-slate-800">Notion API 데이터베이스 연동 설정</h3>
+                    <p class="text-[10px] text-slate-500 mt-1 leading-normal">
+                        Notion 통합 토큰 및 데이터베이스 ID를 등록해 데이터를 공유합니다. 설정이 완료되기 전이나 빈 값일 경우 로컬 시뮬레이션 브라우저 저장소로 원활하게 동작합니다.
+                    </p>
+                </div>
+
+                <div class="space-y-3 text-xs border-t border-slate-100 pt-3">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Notion Integration API Key (비밀 토큰)</label>
+                        <input type="password" id="notion-api-key" placeholder="secret_로 시작하는 토큰 입력..." class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl outline-none focus:border-violet-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Notion Database ID (데이터베이스 ID)</label>
+                        <input type="text" id="notion-db-id" placeholder="32자리 데이터베이스 해시값 입력..." class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl outline-none focus:border-violet-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">우회 CORS Proxy 서버 주소</label>
+                        <input type="text" id="notion-proxy-url" value="https://api.allorigins.win/raw?url=" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl outline-none focus:border-violet-500 transition text-slate-500 font-mono text-[9px]">
+                    </div>
+                </div>
+
+                <div class="flex gap-2 pt-1.5">
+                    <button onclick="saveNotionConfig()" class="flex-1 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl transition text-[11px] shadow-sm">
+                        설정 저장 및 연동하기
+                    </button>
+                    <button onclick="clearNotionConfig()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl transition text-[11px]">
+                        연동 해제
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info / Help Modal Popup -->
+    <div id="info-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-slate-950/60 backdrop-blur-xs" onclick="closeSettingsModal()"></div>
+        <div class="bg-white rounded-2xl p-5 md:p-6 max-w-md w-full mx-4 shadow-2xl relative z-10 border border-slate-100 transform transition duration-200 scale-95 opacity-0" id="modal-container">
+            <button onclick="closeSettingsModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1 bg-slate-100 rounded-full transition">
+                <i class="fa-solid fa-xmark w-4 h-4 flex items-center justify-center"></i>
+            </button>
+            <div class="space-y-4">
+                <div class="w-12 h-12 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-circle-info"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-slate-800">오이시이 일본어 & 주간 출석부 안내</h3>
+                    <p class="text-[10px] text-slate-500 mt-1 leading-normal">
+                        본 앱은 히라가나/가타카나 정밀 트레이싱 학습부터, Notion 데이터베이스 기반의 사원 주간 출석부 기능을 하나의 환경에서 원활하게 운용할 수 있도록 설계된 고급 관리 통합 학습 앱입니다.
+                    </p>
+                </div>
+
+                <div class="space-y-2 text-xs text-slate-600 border-t border-slate-100 pt-3">
+                    <div class="flex items-start">
+                        <span class="text-rose-500 mr-2 font-bold">✔</span>
+                        <p class="text-[10px]"><strong>실시간 Notion API 동기화:</strong> 비밀키와 데이터베이스 ID 입력을 통해 노션에 실시간 상태가 즉시 업데이트됩니다.</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="text-rose-500 mr-2 font-bold">✔</span>
+                        <p class="text-[10px]"><strong>주간 통합 출석 체크:</strong> 월요일부터 일요일까지의 일주일 상태를 펼쳐서 사원들의 현황을 입체적으로 추적합니다.</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="text-rose-500 mr-2 font-bold">✔</span>
+                        <p class="text-[10px]"><strong>강조식 일본어 푸드 단어 연상:</strong> 학습하는 글자가 음식 및 예문 안에서 입체적으로 강조 표시됩니다.</p>
+                    </div>
+                </div>
+
+                <div class="pt-1">
+                    <button onclick="closeSettingsModal()" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition text-xs">
+                        확인했습니다
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generic Beautiful Notification Box (Toast Alternative for alert) -->
+    <div id="notification-toast" class="fixed bottom-6 right-6 z-50 flex items-center space-x-3 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none text-xs">
+        <div id="toast-icon-bg" class="w-6 h-6 bg-emerald-500 rounded-lg flex items-center justify-center text-xs text-white shrink-0">
+            <i class="fa-solid fa-check" id="toast-icon"></i>
+        </div>
+        <p class="font-bold text-white leading-normal" id="toast-message">학습 데이터가 연동되었습니다.</p>
+    </div>
+
+    <!-- CORE DATASTORE & APP SCRIPT -->
+    <script>
+        // Core Japanese Kana & Connected Food Data
+        const kanaData = {
+            basic: [
+                { h: 'あ', k: 'ア', r: 'a', ko: '아', strokes: 3, type: 'vowel', food: { name: 'あめ', koName: '사탕', romaji: 'ame', emoji: '🍬', tag: '디저트', sentence: 'あまいあめをたべます。', koSentence: '달콤한 사탕을 먹습니다.' } },
+                { h: 'い', k: 'イ', r: 'i', ko: '이', strokes: 2, type: 'vowel', food: { name: 'いちご', koName: '딸기', romaji: 'ichigo', emoji: '🍓', tag: '과일', sentence: 'いちごはとてもあかいです。', koSentence: '딸기는 매우 빨갛습니다.' } },
+                { h: 'う', k: 'ウ', r: 'u', ko: '우', strokes: 2, type: 'vowel', food: { name: 'うどん', koName: '우동', romaji: 'udon', emoji: '🍜', tag: '면류', sentence: 'あったかいうどんがすきです。', koSentence: '따뜻한 우동을 좋아합니다.' } },
+                { h: 'え', k: 'エ', r: 'e', ko: '에', strokes: 2, type: 'vowel', food: { name: 'えだまめ', koName: '풋콩', romaji: 'edamame', emoji: '🫛', tag: '채소', sentence: 'ビールとえだまめをちゅうもんする。', koSentence: '맥주와 풋콩을 주문한다.' } },
+                { h: 'お', k: 'オ', r: 'o', ko: '오', strokes: 3, type: 'vowel', food: { name: 'おにぎり', koName: '주먹밥', romaji: 'onigiri', emoji: '🍙', tag: '밥류', sentence: 'おにぎりをつくりました。', koSentence: '주먹밥을 만들었습니다.' } },
+                
+                { h: 'か', k: 'カ', r: 'ka', ko: '카', strokes: 3, type: 'consonant', food: { name: 'かき', koName: '감', romaji: 'kaki', emoji: '🍊', tag: '과일', sentence: 'あき에는かきをたべます。', koSentence: '가을에는 감을 먹습니다.' } },
+                { h: 'き', k: 'キ', r: 'ki', ko: '키', strokes: 4, type: 'consonant', food: { name: 'きのこ', koName: '버섯', romaji: 'kinoko', emoji: '🍄', tag: '채소', sentence: 'きのこがたくさんはいったスープ。', koSentence: '버섯이 많이 들어간 스프.' } },
+                { h: 'く', k: 'ク', r: 'ku', ko: '쿠', strokes: 1, type: 'consonant', food: { name: 'くしかつ', koName: '꼬치튀김', romaji: 'kushikatsu', emoji: '🍢', tag: '튀김', sentence: 'くしかつがサクサクでおいしい。', koSentence: '꼬치튀김이 바삭해서 맛있습니다.' } },
+                { h: 'け', k: 'ケ', r: 'ke', ko: '케', strokes: 3, type: 'consonant', food: { name: 'けーき', koName: '케이크', romaji: 'keeki', emoji: '🍰', tag: '디저트', sentence: 'たんじょうびにけーきをたべます。', koSentence: '생일에 케이크를 먹습니다.' } },
+                { h: 'こ', k: 'コ', r: 'ko', ko: '코', strokes: 2, type: 'consonant', food: { name: 'こめ', koName: '쌀', romaji: 'kome', emoji: '🌾', tag: '곡물', sentence: 'にほんのこめはおいしいです。', koSentence: '일본 쌀은 맛있습니다.' } },
+
+                { h: 'さ', k: 'サ', r: 'sa', ko: '사', strokes: 3, type: 'consonant', food: { name: 'さけ', koName: '일본 술', romaji: 'sake', emoji: '🍶', tag: '주류', sentence: 'さけをのむとげんきになる。', koSentence: '술을 마시면 힘이 난다.' } },
+                { h: 'し', k: 'シ', r: 'shi', ko: '시', strokes: 1, type: 'consonant', food: { name: 'しいたけ', koName: '표고버섯', romaji: 'shiitake', emoji: '🍄', tag: '채소', sentence: 'しいたけをやいてたべます。', koSentence: '표고버섯을 구워서 먹습니다.' } },
+                { h: 'す', k: 'ス', r: 'su', ko: '스', strokes: 2, type: 'consonant', food: { name: 'すし', koName: '초밥', romaji: 'sushi', emoji: '🍣', tag: '일식', sentence: 'すしをたべにいきました。', koSentence: '초밥을 먹으러 갔습니다.' } },
+                { h: 'せ', k: 'セ', r: 'se', ko: '세', strokes: 3, type: 'consonant', food: { name: 'せんべい', koName: '전병', romaji: 'senbei', emoji: '🍘', tag: '디저트', sentence: 'おちゃとせんべいはあいます。', koSentence: '차와 전병은 잘 어울립니다.' } },
+                { h: 'そ', k: 'ソ', r: 'so', ko: '소', strokes: 1, type: 'consonant', food: { name: 'そば', koName: '소바', romaji: 'soba', emoji: '🍜', tag: '면류', sentence: 'あついなつにはそばがいいね。', koSentence: '더운 여름에는 메밀국수가 좋네요.' } },
+
+                { h: 'た', k: 'タ', r: 'ta', ko: '타', strokes: 4, type: 'consonant', food: { name: 'たこやき', koName: '타코야끼', romaji: 'takoyaki', emoji: '🐙', tag: '길거리', sentence: 'たこやきがとってもあついです。', koSentence: '타코야끼가 엄청 뜨겁습니다.' } },
+                { h: 'ち', k: 'チ', r: 'chi', ko: '치', strokes: 3, type: 'consonant', food: { name: 'ちゃわんむし', koName: '계란찜', romaji: 'chawanmushi', emoji: '🥚', tag: '요리', sentence: 'ちゃわんむしはぷるぷるです。', koSentence: '차완무시는 야들야들합니다.' } },
+                { h: 'つ', k: 'ツ', r: 'tsu', ko: '츠', strokes: 1, type: 'consonant', food: { name: 'つくね', koName: '닭 경단', romaji: 'tsukune', emoji: '🍢', tag: '꼬치', sentence: 'つくねにたれをつけます。', koSentence: '츠쿠네에 양념 소스를 바릅니다.' } },
+                { h: 'て', k: 'テ', r: 'te', ko: '테', strokes: 1, type: 'consonant', food: { name: 'てんぷら', koName: '튀김', romaji: 'tenpura', emoji: '🍤', tag: '튀김', sentence: 'てんぷらはサクサクしています。', koSentence: '튀김은 바삭바삭합니다.' } },
+                { h: 'と', k: 'ト', r: 'to', ko: '토', strokes: 2, type: 'consonant', food: { name: 'とんかつ', koName: '돈가스', romaji: 'tonkatsu', emoji: '🥩', tag: '육류', sentence: 'ひるご하んにとんかつをたべた。', koSentence: '점심으로 돈가스를 먹었다.' } },
+
+                { h: 'な', k: 'ナ', r: 'na', ko: '나', strokes: 4, type: 'consonant', food: { name: 'なす', koName: '가지', romaji: 'nasu', emoji: '🍆', tag: '채소', sentence: 'なすをやいてたべます。', koSentence: '가지를 구워서 먹습니다.' } },
+                { h: 'に', k: 'ニ', r: 'ni', ko: '니', strokes: 3, type: 'consonant', food: { name: 'にく', koName: '고기', romaji: 'niku', emoji: '🍖', tag: '육류', sentence: 'にくとやさいをバランスよくたべる。', koSentence: '고기와 채소를 균형 있게 먹는다.' } },
+                { h: 'ぬ', k: 'ヌ', r: 'nu', ko: '누', strokes: 2, type: 'consonant', food: { name: 'ぬかづけ', koName: '겨절임', romaji: 'nukazuke', emoji: '🥒', tag: '반찬', sentence: 'ぬかづけはにほんのごはんにあいます。', koSentence: '겨절임은 일본 밥과 잘 어울립니다.' } },
+                { h: 'ね', k: 'ネ', r: 'ne', ko: '네', strokes: 2, type: 'consonant', food: { name: 'ねぎ', koName: '대파', romaji: 'negi', emoji: '🌱', tag: '채소', sentence: 'ラーメンにねぎをたくさんいれる。', koSentence: '라면에 대파를 가득 넣는다.' } },
+                { h: 'の', k: 'ノ', r: 'no', ko: '노', strokes: 1, type: 'consonant', food: { name: 'のり', koName: '김', romaji: 'nori', emoji: '🍙', tag: '해조류', sentence: 'のりでごはんをまいてたべます。', koSentence: '김으로 밥을 싸서 먹습니다.' } },
+
+                { h: 'は', k: 'ハ', r: 'ha', ko: '하', strokes: 3, type: 'consonant', food: { name: 'はちみつ', koName: '꿀', romaji: 'hachimitsu', emoji: '🍯', tag: '디저트', sentence: 'パンにははちみつが最高。', koSentence: '빵에는 꿀이 최고.' } },
+                { h: 'ひ', k: 'ヒ', r: 'hi', ko: '히', strokes: 1, type: 'consonant', food: { name: 'ひやむぎ', koName: '냉국수', romaji: 'hiyamugi', emoji: '🍜', tag: '면류', sentence: 'ひやむぎはひんやりしておいしい。', koSentence: '냉국수는 차가워서 맛있습니다.' } },
+                { h: 'ふ', k: 'フ', r: 'fu', ko: '후', strokes: 4, type: 'consonant', food: { name: 'ふりかけ', koName: '후리카케', romaji: 'furikake', emoji: '🍚', tag: '반찬', sentence: 'ごはんにふりかけをかける。', koSentence: '밥에 후리카케를 뿌린다.' } },
+                { h: 'へ', k: 'ヘ', r: 'he', ko: '헤', strokes: 1, type: 'consonant', food: { name: 'へぎそば', koName: '소바', romaji: 'hegisoba', emoji: '🍜', tag: '면류', sentence: 'へぎそばをにいがたでたべる。', koSentence: '헤기소바를 니가타에서 먹는다.' } },
+                { h: 'ほ', k: 'ホ', r: 'ho', ko: '호', strokes: 4, type: 'consonant', food: { name: 'ほたて', koName: '가리비', romaji: 'hotate', emoji: '🦪', tag: '해산물', sentence: 'ほたてをバターでやきます。', koSentence: '가리비를 버터로 굽습니다.' } },
+
+                { h: 'ま', k: 'マ', r: 'ma', ko: '마', strokes: 3, type: 'consonant', food: { name: 'まんじゅう', koName: '만쥬', romaji: 'manjuu', emoji: '🥮', tag: '디저트', sentence: 'まんじゅうはあんこ가はいっています।', koSentence: '만쥬는 단팥이 들어있습니다.' } },
+                { h: 'み', k: 'ミ', r: 'mi', ko: '미', strokes: 2, type: 'consonant', food: { name: 'みかん', koName: '귤', romaji: 'mikan', emoji: '🍊', tag: '과일', sentence: 'こたつでみかんをたべます。', koSentence: '코타츠에서 귤을 먹습니다.' } },
+                { h: 'む', k: 'ム', r: 'mu', ko: '무', strokes: 3, type: 'consonant', food: { name: 'むぎちゃ', koName: '보리차', romaji: 'mugicha', emoji: '🍵', tag: '음료', sentence: 'なつにはつめたいむぎちゃをのむ。', koSentence: '여름에는 시원한 보리차를 마신다.' } },
+                { h: 'め', k: 'メ', r: 'me', ko: '메', strokes: 2, type: 'consonant', food: { name: 'めろん', koName: '멜론', romaji: 'meron', emoji: '🍈', tag: '과일', sentence: 'めろんはとてもあまいくだものです。', koSentence: '멜론은 매우 달콤한 과일입니다.' } },
+                { h: 'も', k: 'モ', r: 'mo', ko: '모', strokes: 3, type: 'consonant', food: { name: 'もち', koName: '떡', romaji: 'mochi', emoji: '🍡', tag: '디저트', sentence: 'おしょうがつにもちをたべます。', koSentence: '신정에 떡을 먹습니다.' } },
+
+                { h: 'や', k: 'ヤ', r: 'ya', ko: '야', strokes: 3, type: 'consonant', food: { name: 'やきとり', koName: '닭꼬치', romaji: 'yakitori', emoji: '🍢', tag: '꼬치', sentence: 'やきとりをいざかやでちゅうもんする。', koSentence: '닭꼬치를 이자카야에서 주문한다.' } },
+                { h: null, k: null, r: null, ko: null, strokes: 0, type: 'none' }, 
+                { h: 'ゆ', k: 'ユ', r: 'yu', ko: '유', strokes: 2, type: 'consonant', food: { name: 'ゆず', koName: '유자', romaji: 'yuzu', emoji: '🍋', tag: '과일', sentence: 'ゆずのおちゃをのみます。', koSentence: '유자차를 마십니다.' } },
+                { h: null, k: null, r: null, ko: null, strokes: 0, type: 'none' }, 
+                { h: 'よ', k: 'ヨ', r: 'yo', ko: '요', strokes: 3, type: 'consonant', food: { name: 'ようかん', koName: '양갱', romaji: 'youkan', emoji: '🍫', tag: '디저트', sentence: 'おばあちゃんはようかんがだいすき。', koSentence: '할머니는 양갱을 정말 좋아하신다.' } },
+
+                { h: 'わ', k: 'ワ', r: 'wa', ko: '와', strokes: 2, type: 'consonant', food: { name: 'わさび', koName: '고추냉이', romaji: 'wasabi', emoji: '🌿', tag: '향신료', sentence: 'すしにわさびをすこしいれます。', koSentence: '초밥에 고추냉이를 조금 넣습니다.' } },
+                { h: null, k: null, r: null, ko: null, strokes: 0, type: 'none' }, 
+                { h: null, k: null, r: null, ko: null, strokes: 0, type: 'none' }, 
+                { h: null, k: null, r: null, ko: null, strokes: 0, type: 'none' }, 
+                { h: 'を', k: 'ヲ', r: 'wo', ko: '오', strokes: 3, type: 'consonant', food: { name: 'ねぎをたべる', koName: '파를 먹다', romaji: 'negi wo taberu', emoji: '🥗', tag: '식사', sentence: 'ねぎをたくさんたべましょう。', koSentence: '대파를 많이 먹읍시다!' } },
+                
+                { h: 'ん', k: 'ン', r: 'n', ko: '응', strokes: 1, type: 'consonant', food: { name: 'ぱん', koName: '빵', romaji: 'pan', emoji: '🍞', tag: '식료', sentence: 'あさごはんにぱんをたべました。', koSentence: '아침밥으로 빵을 먹었습니다.' } },
+                { h: null, k: null, r: null, ko: null, strokes: 0, type: 'none' },
+                { h: null, k: null, r: null, ko: null, strokes: 0, type: 'none' },
+                { h: null, k: null, r: null, ko: null, strokes: 0, type: 'none' },
+                { h: null, k: null, r: null, ko: null, strokes: 0, type: 'none' }
+            ],
+            voiced: [
+                { h: 'が', k: 'ガ', r: 'ga', ko: '가', strokes: 5, type: 'voiced', food: { name: 'がむ', koName: '껌', romaji: 'gamu', emoji: '🍬', tag: '간식', sentence: 'ミントのがむをかみます。', koSentence: '민트 맛 껌을 씹습니다.' } },
+                { h: 'ぎ', k: 'ギ', r: 'gi', ko: '기', strokes: 6, type: 'voiced', food: { name: 'ぎゅうにゅう', koName: '우유', romaji: 'gyuunyuu', emoji: '🥛', tag: '음료', sentence: 'あさにぎゅうにゅうをいっぱいのむ。', koSentence: '아침에 우유를 한 잔 마신다.' } },
+                { h: 'ぐ', k: 'グ', r: 'gu', ko: '구', strokes: 3, type: 'voiced', food: { name: 'ぐみ', koName: '젤리', romaji: 'gumi', emoji: '🧸', tag: '디저트', sentence: 'フルーツのぐみがすきです。', koSentence: '과일 젤리를 좋아합니다.' } },
+                { h: 'げ', k: 'ゲ', r: 'ge', ko: '게', strokes: 5, type: 'voiced', food: { name: 'げきからラーメン', koName: '매운 라면', romaji: 'gekikara raamen', emoji: '🌶️', tag: '면류', sentence: 'げきからラーメンにちょうせんする。', koSentence: '매운 라면에 도전해본다.' } },
+                { h: 'ご', k: 'ゴ', r: 'go', ko: '고', strokes: 4, type: 'voiced', food: { name: 'ごはん', koName: '밥', romaji: 'gohan', emoji: '🍚', tag: '밥류', sentence: 'あたたかいごはんをたべます。', koSentence: '따뜻한 밥을 먹습니다.' } },
+                
+                { h: 'ざ', k: 'ザ', r: 'za', ko: '자', strokes: 5, type: 'voiced', food: { name: 'ざるそば', koName: '판메밀국수', romaji: 'zarusoba', emoji: '🍜', tag: '면류', sentence: 'つめたいざるそばがおいしい。', koSentence: '시원한 판모밀이 맛있습니다.' } },
+                { h: 'じ', k: 'ジ', r: 'ji', ko: '지', strokes: 3, type: 'voiced', food: { name: 'じんじゃーえーる', koName: '진저에일', romaji: 'jinjaaeeru', emoji: '🥤', tag: '음료', sentence: 'じんじゃーえーるをちゅうもんする。', koSentence: '진저에일을 주문합니다.' } },
+                { h: 'ず', k: 'ズ', r: 'zu', ko: '즈', strokes: 4, type: 'voiced', food: { name: 'ずわいがに', koName: '대게', romaji: 'zuwaigani', emoji: '🦀', tag: '해산물', sentence: 'ずわいがにはあまみがあっておいしい।', koSentence: '대게는 단맛이 돌아서 맛있습니다.' } },
+                { h: 'ぜ', k: 'ゼ', r: 'ze', ko: '제', strokes: 5, type: 'voiced', food: { name: 'ぜりー', koName: '젤리', romaji: 'zerii', emoji: '🍮', tag: '디저트', sentence: 'つめたいぜりーがたべたいな。', koSentence: '시원한 푸딩 젤리가 먹고 싶네요.' } },
+                { h: 'ぞ', k: 'ゾ', r: 'zo', ko: '조', strokes: 3, type: 'voiced', food: { name: 'ぞうすい', koName: '죽', romaji: 'zousui', emoji: '🍲', tag: '요리', sentence: 'おなかにやさしいぞうすい。', koSentence: '소화에 좋은 따뜻한 죽.' } },
+
+                { h: 'だ', k: 'ダ', r: 'da', ko: '다', strokes: 6, type: 'voiced', food: { name: 'だんご', koName: '경단 떡', romaji: 'dango', emoji: '🍡', tag: '디저트', sentence: 'おちゃといっしょにだんごをたべる。', koSentence: '차를 마시면서 경단을 먹는다.' } },
+                { h: 'ぢ', k: 'ヂ', r: 'di/ji', ko: '지', strokes: 5, type: 'voiced', food: { name: 'はなぢ', koName: '코피', romaji: 'hanadi', emoji: '🩸', tag: '신체', sentence: 'はなぢがでました。', koSentence: '코피가 났습니다.' } },
+                { h: 'づ', k: 'ヅ', r: 'du/zu', ko: '즈', strokes: 3, type: 'voiced', food: { name: 'おかず', koName: '반찬', romaji: 'okazu', emoji: '🍱', tag: '식사', sentence: 'おいしいおかずがたくさんある。', koSentence: '맛있는 반찬이 가득 있습니다.' } },
+                { h: 'で', k: 'デ', r: 'de', ko: '데', strokes: 3, type: 'voiced', food: { name: 'でんぷら', koName: '튀김', romaji: 'denpura', emoji: '🍤', tag: '튀김', sentence: 'でんぷらがこうばしい。', koSentence: '덴프라(튀김)가 고소합니다.' } },
+                { h: 'ど', k: 'ド', r: 'do', ko: '도', strokes: 4, type: 'voiced', food: { name: 'どーなつ', koName: '도넛', romaji: 'doonatsu', emoji: '🍩', tag: '디저트', sentence: 'あまいどーなつがすきです。', koSentence: '달콤한 도넛을 좋아해요.' } },
+
+                { h: 'ば', k: 'バ', r: 'ba', ko: '바', strokes: 5, type: 'voiced', food: { name: 'ばな나', koName: '바나나', romaji: 'banana', emoji: '🍌', tag: '과일', sentence: 'あさごはんにばななをたべます。', koSentence: '아침밥으로 바나나를 먹습니다.' } },
+                { h: 'び', k: 'ビ', r: 'bi', ko: '비', strokes: 3, type: 'voiced', food: { name: 'びーる', koName: '맥주', romaji: 'biiru', emoji: '🍺', tag: '주류', sentence: 'つめたいびーるを의む。', koSentence: '시원한 맥주를 마신다.' } },
+                { h: 'ぶ', k: 'ブ', r: 'bu', ko: '부', strokes: 6, type: 'voiced', food: { name: 'ぶどう', koName: '포도', romaji: 'budou', emoji: '🍇', tag: '과일', sentence: 'あかいぶどうはおいしいです。', koSentence: '붉은 포도는 맛있습니다.' } },
+                { h: 'べ', k: 'ベ', r: 'be', ko: '베', strokes: 3, type: 'voiced', food: { name: 'べんとう', koName: '도시락', romaji: 'bentou', emoji: '🍱', tag: '식사', sentence: 'べんとうをこうえんでたべる。', koSentence: '도시락을 공원에서 먹는다.' } },
+                { h: 'ぼ', k: 'ボ', r: 'bo', ko: '보', strokes: 6, type: 'voiced', food: { name: 'ぼーろ', koName: '과자', romaji: 'booro', emoji: '🍪', tag: '과자', sentence: 'あかちゃんがぼーろをたべる。', koSentence: '아기가 보로 과자를 먹는다.' } },
+
+                { h: 'ぱ', k: 'パ', r: 'pa', ko: '파', strokes: 4, type: 'handakuon', food: { name: 'ぱすた', koName: '파스타', romaji: 'pasuta', emoji: '🍝', tag: '양식', sentence: 'トマトぱすたをつくります。', koSentence: '토마토 파스타를 만듭니다.' } },
+                { h: 'ぴ', k: 'ピ', r: 'pi', ko: '피', strokes: 2, type: 'handakuon', food: { name: 'ぴーまん', koName: '피망', romaji: 'piiman', emoji: '🫑', tag: '채소', sentence: 'ぴーまんはにがいからにがてです。', koSentence: '피망은 써서 좋아하지 않습니다.' } },
+                { h: 'ぷ', k: 'プ', r: 'pu', ko: '푸', strokes: 5, type: 'handakuon', food: { name: 'ぷりん', koName: '푸딩', romaji: 'purin', emoji: '🍮', tag: '디저트', sentence: 'ぷりんはぷるぷるしています。', koSentence: '푸딩은 탱글탱글합니다.' } },
+                { h: 'ぺ', k: 'ペ', r: 'pe', ko: '페', strokes: 2, type: 'handakuon', food: { name: 'ぺいすとりー', koName: '페이스트리', romaji: 'peisutorii', emoji: '🥐', tag: '빵류', sentence: 'サクサクぺいすとりーがすき。', koSentence: '바삭한 페이스트리 빵을 좋아해요.' } },
+                { h: 'ぽ', k: 'ポ', r: 'po', ko: '포', strokes: 5, type: 'handakuon', food: { name: 'ぽてと', koName: '감자튀김', romaji: 'poteto', emoji: '🍟', tag: '튀김', sentence: 'ふらいどぽてとがすきです。', koSentence: '감자튀김을 좋아합니다.' } }
+            ],
+            yoon: [
+                { h: 'きゃ', k: 'キャ', r: 'kya', ko: '캬', strokes: 6, type: 'yoon', food: { name: 'きゃべつ', koName: '양배추', romaji: 'kyabetsu', emoji: '🥬', tag: '채소', sentence: 'きゃべつをせんぎりにする。', koSentence: '양배추를 잘게 채 썬다.' } },
+                { h: 'きゅ', k: 'キュ', r: 'kyu', ko: '큐', strokes: 6, type: 'yoon', food: { name: 'きゅうり', koName: '오이', romaji: 'kyuuri', emoji: '🥒', tag: '채소', sentence: 'きゅうりのあさづけをつくる。', koSentence: '오이 소금절임을 만든다.' } },
+                { h: 'きょ', k: 'キョ', r: 'kyo', ko: '켜', strokes: 7, type: 'yoon', food: { name: 'きょうざ', koName: '교자 만두', romaji: 'kyouza', emoji: '🥟', tag: '만두', sentence: 'きょうざをやきあげました。', koSentence: '교자 만두를 바삭하게 구웠습니다.' } },
+                
+                { h: 'しゃ', k: 'シャ', r: 'sha', ko: '샤', strokes: 4, type: 'yoon', food: { name: 'しゃけ', koName: '연어', romaji: 'shake', emoji: '🐟', tag: '생선', sentence: 'あさごはんにしゃけをやきます。', koSentence: '아침밥으로 연어를 굽습니다.' } },
+                { h: 'しゅ', k: 'シュ', r: 'shu', ko: '슈', strokes: 3, type: 'yoon', food: { name: 'しゅうまい', koName: '딤섬', romaji: 'shuumai', emoji: '🥟', tag: '중식', sentence: 'あついしゅうまいをふうふうする。', koSentence: '뜨거운 슈마이를 후후 불어 먹는다.' } },
+                { h: 'しょ', k: 'ショ', r: 'sho', ko: '쇼', strokes: 4, type: 'yoon', food: { name: 'しょうゆ', koName: '간장', romaji: 'shouyu', emoji: '🏺', tag: '소스', sentence: 'しょうゆをすこしたらします।', koSentence: '간장을 약간 떨어뜨립니다.' } },
+
+                { h: 'ちゃ', k: 'チャ', r: 'cha', ko: '챠', strokes: 6, type: 'yoon', food: { name: 'ちゃ', koName: '녹차', romaji: 'cha', emoji: '🍵', tag: '음료', sentence: 'あったかいおちゃをのみましょう。', koSentence: '따뜻한 차를 마십시다.' } },
+                { h: 'ちゅ', k: 'チュ', r: 'chu', ko: '츄', strokes: 5, type: 'yoon', food: { name: 'ちゅーりっぷ', koName: '닭봉 튀김', romaji: 'chuurippuchikin', emoji: '🍗', tag: '육류', sentence: 'ちゅーりっぷちきんは大好物。', koSentence: '닭봉 튀김은 아이들이 제일 좋아해요.' } },
+                { h: 'ちょ', k: 'チョ', r: 'cho', ko: '쵸', strokes: 6, type: 'yoon', food: { name: 'ちょこれーと', koName: '초콜릿', romaji: 'chokoreeto', emoji: '🍫', tag: '디저트', sentence: 'ちょこれーとをプレゼントする。', koSentence: '초콜릿을 선물한다.' } },
+
+                { h: 'りゃ', k: 'リャ', r: 'rya', ko: '랴', strokes: 5, type: 'yoon', food: { name: 'りゃくしき', koName: '간이 도시락', romaji: 'ryakushikibentou', emoji: '🍱', tag: '도시락', sentence: 'りゃくしきべんとうだけどおいしい。', koSentence: '약식 간이 도시락이지만 맛있습니다.' } },
+                { h: 'りゅ', k: 'リュ', r: 'ryu', ko: '류', strokes: 4, type: 'yoon', food: { name: 'りゅうきゅう', koName: '생선 무침', romaji: 'ryuukyuu', emoji: '🐟', tag: '요리', sentence: 'りゅうきゅうをさしみでつくる。', koSentence: '사시미를 이용해 류큐 무침을 만듭니다.' } },
+                { h: 'りょ', k: 'リョ', r: 'ryo', ko: '료', strokes: 5, type: 'yoon', food: { name: 'りょくちゃ', koName: '녹차(료쿠차)', romaji: 'ryokucha', emoji: '🍵', tag: '음료', sentence: 'にほんのりょくちゃはかおりがいい。', koSentence: '일본 녹차는 향이 좋습니다.' } }
+            ]
+        };
+
+        // GLOBAL APP STATE VARIABLES
+        let currentScript = 'hiragana';
+        let currentCategory = 'basic';
+        let selectedKana = kanaData.basic[0];
+        let masteredKanas = JSON.parse(localStorage.getItem('masteredKanas')) || [];
+        
+        // Notion & User DB Local Fallback Datastore
+        let notionConfig = JSON.parse(localStorage.getItem('notionConfig')) || { apiKey: "", dbId: "", proxy: "https://api.allorigins.win/raw?url=" };
+        
+        // Default Local Employee Data
+        let usersData = JSON.parse(localStorage.getItem('localUsersData')) || [
+            { id: "M001", name: "홍길동", attendance: ["2026-07-06", "2026-07-08", "2026-07-10"] },
+            { id: "M002", name: "이지민", attendance: ["2026-07-06", "2026-07-07", "2026-07-09:N", "2026-07-10"] },
+            { id: "M003", name: "강현우", attendance: ["2026-07-08", "2026-07-10:N"] },
+            { id: "M004", name: "사토 요시", attendance: ["2026-07-06", "2026-07-09"] }
+        ];
+
+        // Notices Datastore
+        let noticesData = JSON.parse(localStorage.getItem('localNoticesData')) || [
+            { id: "n1", type: "notice", author: "홍길동", content: "안녕하세요! 오이시이 일본어 공부방에 오신 것을 환영합니다.\n매일 5분씩 문자 학습판과 퀴즈를 활용해 일본어 마스터가 되어보세요!", createdAt: "2026-07-10 09:00" },
+            { id: "n2", type: "homework", author: "사토 요시", content: "이번 주 과제: 히라가나 [あ, い, う, え, お]단 따라 쓰고, 연상 단어 '우동, 딸기' 등의 발음 3회씩 들으며 복습하기", createdAt: "2026-07-10 10:30" },
+            { id: "n3", type: "share", author: "강현우", content: "일본 음식 단어를 공부할 때 쓰시(🍣)나 라멘(🍜) 같은 글자가 단어 본문 내에서 하이라이트 되니 시각적으로 정말 잘 외워지네요! 추천합니다.", createdAt: "2026-07-10 11:15" }
+        ];
+        let activeNoticeFilter = 'all';
+
+        // Weekly Calendar state
+        let currentWeekStartDate = getMondayOfDate(new Date());
+
+        // Canvas Controllers
+        let miniCanvas, miniCtx, bigCanvas, bigCtx;
+        let isDrawing = false;
+        let lastX = 0, lastY = 0;
+        let drawingColor = '#ffffff';
+
+        // Quiz State
+        let activeQuizType = 'kana_to_romaji';
+        let quizQuestions = [];
+        let currentQuestionIndex = 0;
+        let quizScore = 0;
+        let quizCorrectAnswers = 0;
+        let quizLives = 3;
+
+        window.onload = function() {
+            // Render components
+            renderKanaMatrix();
+            updateMasteredCountUI();
+            initCanvases();
+            updateDrawCharOptions();
+            updateDetailPanel(kanaData.basic[0]);
+
+            // Load Notion config and sync users
+            initNotionConfigUI();
+            loadUsersFromNotion();
+
+            // Render default notices
+            renderNotices();
+            populateNoticeAuthorOptions();
+        };
+
+        function switchTab(tabId) {
+            const tabs = ['chart', 'food', 'drawing', 'quiz', 'attendance', 'notice'];
+            tabs.forEach(t => {
+                const el = document.getElementById(`tab-${t}`);
+                if (el) el.classList.add('hidden');
+
+                // Desktop navigation buttons state sync
+                const dBtn = document.getElementById(`nav-${t}`);
+                if (dBtn) {
+                    dBtn.className = "px-3.5 py-2 rounded-xl text-xs font-semibold transition text-slate-600 hover:text-rose-600 hover:bg-rose-50/50";
+                }
+            });
+
+            // Show and Activate selected tab
+            const targetTab = document.getElementById(`tab-${tabId}`);
+            if (targetTab) targetTab.classList.remove('hidden');
+
+            const targetDBtn = document.getElementById(`nav-${tabId}`);
+            if (targetDBtn) {
+                targetDBtn.className = "px-3.5 py-2 rounded-xl text-xs font-bold text-rose-600 bg-rose-50 shadow-xs border border-rose-100/50";
+            }
+
+            // Fire events
+            if (tabId === 'food') {
+                renderFoodCards();
+            } else if (tabId === 'drawing') {
+                setTimeout(resizeBigCanvas, 20);
+            } else if (tabId === 'attendance') {
+                loadUsersFromNotion();
+            } else if (tabId === 'notice') {
+                renderNotices();
+                populateNoticeAuthorOptions();
+            }
+        }
+
+        function renderKanaMatrix() {
+            const container = document.getElementById('kana-matrix-container');
+            if(!container) return;
+            container.innerHTML = '';
+
+            const list = kanaData[currentCategory];
+
+            list.forEach((item) => {
+                if (!item || item.type === 'none') {
+                    // Spacer Empty box
+                    const empty = document.createElement('div');
+                    empty.className = "bg-slate-50/20 rounded-xl h-11 border border-dashed border-slate-100";
+                    container.appendChild(empty);
+                    return;
+                }
+
+                const label = currentScript === 'hiragana' ? item.h : item.k;
+                const isMastered = masteredKanas.includes(item.h);
+                const isActive = selectedKana.h === item.h;
+
+                const card = document.createElement('div');
+                card.onclick = () => {
+                    handleKanaCardInteraction(item);
+                };
+
+                let activeStyle = "border-slate-100 hover:border-rose-300 hover:bg-rose-50/20";
+                if (isActive) {
+                    activeStyle = "border-rose-500 bg-rose-500 text-white shadow-sm scale-105";
+                }
+
+                card.className = `h-11 rounded-xl border transition-all duration-150 cursor-pointer p-1 flex flex-col justify-between relative overflow-hidden group ${activeStyle} ${isActive ? '' : 'bg-white'}`;
+
+                const textClass = isActive ? 'text-white font-extrabold' : 'text-slate-800 font-bold';
+                const subTextClass = isActive ? 'text-rose-100' : 'text-slate-400';
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start w-full">
+                        <span class="text-[8px] font-bold uppercase ${subTextClass}">${item.r}</span>
+                        ${isMastered ? `<span class="text-[7px] text-emerald-500 bg-emerald-50 w-3 h-3 rounded-full flex items-center justify-center font-bold shrink-0"><i class="fa-solid fa-check"></i></span>` : ''}
+                    </div>
+                    <div class="text-center pb-0.5">
+                        <span class="text-lg leading-none japanese-font ${textClass}">${label}</span>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        function setScriptType(type) {
+            currentScript = type;
+            document.getElementById('btn-hiragana').className = type === 'hiragana' 
+                ? 'px-3 py-1.5 text-[10px] md:text-xs font-bold rounded-lg shadow-sm transition bg-white text-rose-600'
+                : 'px-3 py-1.5 text-[10px] md:text-xs font-bold rounded-lg transition text-slate-500 hover:text-slate-800';
+            
+            document.getElementById('btn-katakana').className = type === 'katakana' 
+                ? 'px-3 py-1.5 text-[10px] md:text-xs font-bold rounded-lg shadow-sm transition bg-white text-rose-600'
+                : 'px-3 py-1.5 text-[10px] md:text-xs font-bold rounded-lg transition text-slate-500 hover:text-slate-800';
+
+            renderKanaMatrix();
+            updateDetailPanel(selectedKana);
+        }
+
+        function setKanaCategory(cat) {
+            currentCategory = cat;
+            const buttons = ['basic', 'voiced', 'yoon'];
+            buttons.forEach(b => {
+                const btn = document.getElementById(`btn-cat-${b === 'basic' ? 'basic' : b === 'voiced' ? 'voiced' : 'yoon'}`);
+                if (b === cat) {
+                    btn.className = "px-2.5 py-1.5 text-[10px] md:text-xs font-bold rounded-lg shadow-sm transition bg-white text-slate-800";
+                } else {
+                    btn.className = "px-2.5 py-1.5 text-[10px] md:text-xs font-medium rounded-lg transition text-slate-500 hover:text-slate-800";
+                }
+            });
+
+            const collection = kanaData[cat].filter(x => x && x.h);
+            if (collection.length > 0) {
+                selectedKana = collection[0];
+            }
+
+            renderKanaMatrix();
+            updateDetailPanel(selectedKana);
+        }
+
+        function handleKanaCardInteraction(item) {
+            selectedKana = item;
+            renderKanaMatrix();
+            updateDetailPanel(item);
+        }
+
+        function updateDetailPanel(item) {
+            if (!item) return;
+            selectedKana = item;
+
+            const isHiragana = currentScript === 'hiragana';
+            const charToShow = isHiragana ? item.h : item.k;
+            const labelType = isHiragana ? '히라가나' : '가타카나';
+
+            const labelEl = document.getElementById('detail-script-type');
+            if(!labelEl) return; 
+
+            labelEl.innerText = labelType;
+            document.getElementById('detail-big-kana').innerText = charToShow;
+            document.getElementById('detail-romaji').innerText = item.r;
+            document.getElementById('detail-stroke-text').innerText = `획수: ${item.strokes}획 | 한국어 발음: '${item.ko}'`;
+            document.getElementById('canvas-guideline').innerText = charToShow;
+
+            // Star state update
+            const isMastered = masteredKanas.includes(item.h);
+            const bookmarkIcon = document.getElementById('kana-mastery-icon');
+            if (isMastered) {
+                bookmarkIcon.className = "fa-solid fa-check text-rose-500";
+                bookmarkIcon.parentElement.classList.add('bg-rose-100', 'text-rose-600');
+            } else {
+                bookmarkIcon.className = "fa-regular fa-bookmark text-slate-400";
+                bookmarkIcon.parentElement.classList.remove('bg-rose-100', 'text-rose-600');
+            }
+
+            clearMiniCanvas();
+
+            // Food bindings update
+            const food = item.food;
+            if (food) {
+                document.getElementById('linked-food-card').classList.remove('hidden');
+                document.getElementById('linked-food-tag').innerText = food.tag;
+                document.getElementById('linked-food-emoji').innerText = food.emoji;
+                document.getElementById('linked-food-romaji').innerText = food.romaji;
+                document.getElementById('linked-food-meaning').innerText = food.koName;
+
+                let formattedName = food.name;
+                if (formattedName.includes(charToShow)) {
+                    formattedName = formattedName.replaceAll(charToShow, `<span class="text-rose-500 font-extrabold underline">${charToShow}</span>`);
+                }
+                document.getElementById('linked-food-kana').innerHTML = formattedName;
+
+                let formattedSentence = food.sentence;
+                if (formattedSentence.includes(charToShow)) {
+                    formattedSentence = formattedSentence.replaceAll(charToShow, `<span class="text-rose-500 font-bold">${charToShow}</span>`);
+                }
+                document.getElementById('linked-sentence-ja').innerHTML = formattedSentence;
+                document.getElementById('linked-sentence-ko').innerText = food.koSentence;
+            } else {
+                document.getElementById('linked-food-card').classList.add('hidden');
+            }
+        }
+
+        function toggleKanaMastery() {
+            const hChar = selectedKana.h;
+            if (masteredKanas.includes(hChar)) {
+                masteredKanas = masteredKanas.filter(x => x !== hChar);
+                showToast(`'${hChar}' 마스터 등록을 해제했습니다.`, 'info');
+            } else {
+                masteredKanas.push(hChar);
+                showToast(`🎉 '${hChar}' 문자를 마스터 완료!`, 'success');
+            }
+            localStorage.setItem('masteredKanas', JSON.stringify(masteredKanas));
+            updateMasteredCountUI();
+            
+            // Re-render
+            renderKanaMatrix();
+            updateDetailPanel(selectedKana);
+        }
+
+        function updateMasteredCountUI() {
+            const count = masteredKanas.length;
+            const countEl = document.getElementById('mastered-count');
+            if(countEl) countEl.innerText = count;
+        }
+
+        function resetStudyProgress() {
+            openCustomConfirm("모든 일본어 글자 마스터 기록 및 학습 데이터를 전체 초기화하시겠습니까?", () => {
+                masteredKanas = [];
+                localStorage.removeItem('masteredKanas');
+                updateMasteredCountUI();
+                renderKanaMatrix();
+                if(selectedKana) updateDetailPanel(selectedKana);
+                showToast("학습 통계가 정상적으로 초기화되었습니다.", "info");
+            });
+        }
+
+        function speakText(text) {
+            if (!('speechSynthesis' in window)) {
+                showToast("브라우저가 오디오 음성 출력을 지원하지 않습니다.", "error");
+                return;
+            }
+
+            window.speechSynthesis.cancel();
+
+            const cleanText = text.replace(/<[^>]*>/g, '');
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = 'ja-JP';
+            utterance.rate = 0.85;
+
+            const voices = window.speechSynthesis.getVoices();
+            const jpVoice = voices.find(v => v.lang.includes('ja-JP'));
+            if (jpVoice) utterance.voice = jpVoice;
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function speakCurrentKana() {
+            const targetChar = currentScript === 'hiragana' ? selectedKana.h : selectedKana.k;
+            speakText(targetChar);
+        }
+
+        function initCanvases() {
+            miniCanvas = document.getElementById('mini-draw-canvas');
+            if (miniCanvas) {
+                miniCtx = miniCanvas.getContext('2d');
+                setupCanvasListeners(miniCanvas, miniCtx);
+            }
+
+            bigCanvas = document.getElementById('big-draw-canvas');
+            if (bigCanvas) {
+                bigCtx = bigCanvas.getContext('2d');
+                setupCanvasListeners(bigCanvas, bigCtx, true);
+            }
+
+            window.addEventListener('resize', resizeBigCanvas);
+        }
+
+        function resizeBigCanvas() {
+            if(!bigCanvas) return;
+            const parent = bigCanvas.parentElement;
+            if(!parent) return;
+            const rect = parent.getBoundingClientRect();
+            bigCanvas.width = rect.width - 16;
+            bigCanvas.height = Math.max(250, rect.height - 32);
+            clearBigCanvas();
+        }
+
+        function setupCanvasListeners(canvas, ctx, isBig = false) {
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.lineWidth = isBig ? 5 : 3.5;
+            ctx.strokeStyle = isBig ? drawingColor : '#f43f5e';
+
+            // Mouse Handle
+            canvas.addEventListener('mousedown', (e) => {
+                isDrawing = true;
+                [lastX, lastY] = getCoordinates(e, canvas);
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                if (!isDrawing) return;
+                const [currX, currY] = getCoordinates(e, canvas);
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(currX, currY);
+                ctx.stroke();
+                [lastX, lastY] = [currX, currY];
+            });
+
+            canvas.addEventListener('mouseup', () => isDrawing = false);
+            canvas.addEventListener('mouseout', () => isDrawing = false);
+
+            // Touch Handlers for Seamless Mobile Touch Support
+            canvas.addEventListener('touchstart', (e) => {
+                isDrawing = true;
+                const touch = e.touches[0];
+                [lastX, lastY] = getCoordinates(touch, canvas);
+                e.preventDefault();
+            }, { passive: false });
+
+            canvas.addEventListener('touchmove', (e) => {
+                if (!isDrawing) return;
+                const touch = e.touches[0];
+                const [currX, currY] = getCoordinates(touch, canvas);
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(currX, currY);
+                ctx.stroke();
+                [lastX, lastY] = [currX, currY];
+                e.preventDefault();
+            }, { passive: false });
+
+            canvas.addEventListener('touchend', () => isDrawing = false);
+        }
+
+        function getCoordinates(e, canvas) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+            const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+            return [
+                clientX - rect.left,
+                clientY - rect.top
+            ];
+        }
+
+        function clearMiniCanvas() {
+            if(miniCtx && miniCanvas) {
+                miniCtx.clearRect(0, 0, miniCanvas.width, miniCanvas.height);
+            }
+        }
+
+        function clearBigCanvas() {
+            if(bigCtx && bigCanvas) {
+                bigCtx.clearRect(0, 0, bigCanvas.width, bigCanvas.height);
+                bigCtx.strokeStyle = drawingColor;
+                bigCtx.lineJoin = 'round';
+                bigCtx.lineCap = 'round';
+                bigCtx.lineWidth = 5;
+            }
+        }
+
+        function changeDrawColor(color) {
+            drawingColor = color;
+            if(bigCtx) {
+                bigCtx.strokeStyle = color;
+            }
+            const btns = document.querySelectorAll('.color-btn');
+            btns.forEach(btn => {
+                btn.classList.remove('ring-4', 'ring-teal-400');
+            });
+            event.target.classList.add('ring-4', 'ring-teal-400');
+        }
+
+        function updateDrawCharOptions() {
+            const scriptSelect = document.getElementById('draw-select-script').value;
+            const charSelect = document.getElementById('draw-select-char');
+            if(!charSelect) return;
+            charSelect.innerHTML = '';
+
+            const list = [...kanaData.basic, ...kanaData.voiced, ...kanaData.yoon].filter(item => item && item.h);
+
+            list.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.h;
+                opt.innerText = `${scriptSelect === 'hiragana' ? item.h : item.k} (${item.r})`;
+                charSelect.appendChild(opt);
+            });
+
+            selectDrawCharacter();
+        }
+
+        function selectDrawCharacter() {
+            const selectedChar = document.getElementById('draw-select-char').value;
+            const scriptSelect = document.getElementById('draw-select-script').value;
+            
+            const matchedItem = [...kanaData.basic, ...kanaData.voiced, ...kanaData.yoon].find(item => item && item.h === selectedChar);
+            if (!matchedItem) return;
+
+            const displayChar = scriptSelect === 'hiragana' ? matchedItem.h : matchedItem.k;
+            const labelType = scriptSelect === 'hiragana' ? '히라가나' : '가타카나';
+
+            document.getElementById('draw-info-type').innerText = `${labelType} [${displayChar}]`;
+            document.getElementById('draw-info-strokes').innerText = `${matchedItem.strokes} 획`;
+            document.getElementById('big-canvas-guideline').innerText = displayChar;
+
+            clearBigCanvas();
+        }
+
+        function renderFoodCards(filterType = 'all') {
+            const container = document.getElementById('food-cards-grid');
+            if(!container) return;
+            container.innerHTML = '';
+
+            let list = [...kanaData.basic, ...kanaData.voiced, ...kanaData.yoon]
+                .filter(item => item && item.food);
+
+            if (filterType === 'vowel') {
+                list = list.filter(item => item.type === 'vowel');
+            } else if (filterType === 'consonant') {
+                list = list.filter(item => item.type === 'consonant');
+            }
+
+            list.forEach(item => {
+                const food = item.food;
+                const charToShow = currentScript === 'hiragana' ? item.h : item.k;
+                
+                let highlightText = food.name;
+                if (highlightText.includes(charToShow)) {
+                    highlightText = highlightText.replaceAll(charToShow, `<span class="bg-rose-100 text-rose-600 px-1 py-0.5 rounded border border-rose-200 font-extrabold underline">${charToShow}</span>`);
+                }
+
+                const card = document.createElement('div');
+                card.className = "bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group";
+                
+                card.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[9px] font-bold text-slate-400">학습 매칭: <span class="text-rose-500 font-black uppercase japanese-font">${charToShow} (${item.r})</span></span>
+                            <span class="text-[9px] bg-slate-50 border border-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">${food.tag}</span>
+                        </div>
+
+                        <div class="flex items-start space-x-3">
+                            <div class="w-10 h-10 bg-orange-50 text-orange-600 rounded-xl flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition duration-300">
+                                ${food.emoji}
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-black text-slate-800 japanese-font tracking-wide leading-normal">${highlightText}</h4>
+                                <div class="flex items-center space-x-2 text-[10px] text-slate-500 mt-0.5">
+                                    <span class="font-bold text-slate-700">${food.romaji}</span>
+                                    <span>•</span>
+                                    <span>${food.koName}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 rounded-xl p-2.5 text-xs space-y-0.5">
+                            <p class="font-bold text-slate-700 leading-normal japanese-font">${food.sentence}</p>
+                            <p class="text-slate-400 text-[10px]">${food.koSentence}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-1.5 mt-3 pt-2.5 border-t border-slate-100">
+                        <button onclick="speakText('${food.name}')" class="flex-1 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-bold rounded-lg transition flex items-center justify-center space-x-1">
+                            <i class="fa-solid fa-volume-high text-[9px]"></i>
+                            <span>단어 듣기</span>
+                        </button>
+                        <button onclick="speakText('${food.sentence}')" class="flex-1 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 text-[10px] font-bold rounded-lg transition flex items-center justify-center space-x-1">
+                            <i class="fa-solid fa-play text-[9px]"></i>
+                            <span>예문 전체 듣기</span>
+                        </button>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        function filterFoodCards(type) {
+            const btnIds = ['all', 'vowel', 'consonant'];
+            btnIds.forEach(id => {
+                const btn = document.getElementById(`btn-food-filter-${id}`);
+                if (btn) {
+                    if (id === type) {
+                        btn.className = "px-3 py-1.5 bg-orange-500 text-white rounded-lg text-[10px] md:text-xs font-bold shadow-sm transition shrink-0";
+                    } else {
+                        btn.className = "px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-[10px] md:text-xs font-bold transition shrink-0";
+                    }
+                }
+            });
+            renderFoodCards(type);
+        }
+
+        function selectQuizType(type) {
+            activeQuizType = type;
+            const btns = ['ktr', 'ftm'];
+            btns.forEach(b => {
+                const btn = document.getElementById(`btn-quiz-type-${b}`);
+                if (btn) {
+                    if ((b === 'ktr' && type === 'kana_to_romaji') || (b === 'ftm' && type === 'food_to_meaning')) {
+                        btn.className = "quiz-type-btn p-3 bg-white border-2 border-rose-500 text-rose-700 rounded-xl text-xs font-bold transition flex items-center justify-between";
+                        btn.querySelector('i').className = "fa-solid fa-circle-check text-rose-500";
+                    } else {
+                        btn.className = "quiz-type-btn p-3 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-between";
+                        btn.querySelector('i').className = "fa-solid fa-circle-check text-slate-200";
+                    }
+                }
+            });
+        }
+
+        function startQuizSession() {
+            quizQuestions = [];
+            currentQuestionIndex = 0;
+            quizScore = 0;
+            quizCorrectAnswers = 0;
+            quizLives = 3;
+
+            const collection = [...kanaData.basic, ...kanaData.voiced].filter(x => x && x.h && x.food);
+            const shuffled = collection.sort(() => 0.5 - Math.random());
+            
+            for(let i = 0; i < 5; i++) {
+                const target = shuffled[i % shuffled.length];
+                let choices = [target];
+                while(choices.length < 4) {
+                    const rand = collection[Math.floor(Math.random() * collection.length)];
+                    if(!choices.some(x => x.h === rand.h)) {
+                        choices.push(rand);
+                    }
+                }
+                choices.sort(() => 0.5 - Math.random());
+                quizQuestions.push({ target: target, choices: choices });
+            }
+
+            document.getElementById('quiz-start-panel').classList.add('hidden');
+            document.getElementById('quiz-result-panel').classList.add('hidden');
+            document.getElementById('quiz-game-panel').classList.remove('hidden');
+
+            renderCurrentQuestion();
+        }
+
+        function renderCurrentQuestion() {
+            if (currentQuestionIndex >= quizQuestions.length || quizLives <= 0) {
+                endQuizSession(false);
+                return;
+            }
+
+            const q = quizQuestions[currentQuestionIndex];
+            
+            document.getElementById('quiz-curr-index').innerText = currentQuestionIndex + 1;
+            document.getElementById('quiz-lives').innerText = quizLives;
+            document.getElementById('quiz-score').innerText = quizScore;
+            
+            const progPercent = ((currentQuestionIndex + 1) / quizQuestions.length) * 100;
+            document.getElementById('quiz-progress-bar').style.width = `${progPercent}%`;
+
+            const optionsContainer = document.getElementById('quiz-options-container');
+            optionsContainer.innerHTML = '';
+
+            const isKanaToRomaji = activeQuizType === 'kana_to_romaji';
+
+            if (isKanaToRomaji) {
+                document.getElementById('quiz-badge').innerText = "KANA PRONUNCIATION QUIZ";
+                document.getElementById('quiz-question-txt').innerText = q.target.h;
+                document.getElementById('quiz-instruction-txt').innerText = "이 일본어 글자의 알맞은 로마자 발음 표기는?";
+
+                speakText(q.target.h);
+
+                q.choices.forEach(choice => {
+                    const btn = document.createElement('button');
+                    btn.onclick = () => submitQuizAnswer(choice, btn);
+                    btn.className = "quiz-opt-btn p-3.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-slate-300 text-slate-700 text-xs font-bold rounded-xl transition flex items-center justify-between";
+                    btn.innerHTML = `
+                        <span>${choice.r} (${choice.ko})</span>
+                        <div class="choice-marker w-3.5 h-3.5 rounded-full border border-slate-300"></div>
+                    `;
+                    optionsContainer.appendChild(btn);
+                });
+            } else {
+                document.getElementById('quiz-badge').innerText = "DELICIOUS FOOD TRANSLATION QUIZ";
+                document.getElementById('quiz-question-txt').innerText = `${q.target.food.emoji} ${q.target.food.name}`;
+                document.getElementById('quiz-instruction-txt').innerText = `위 음식 단어의 올바른 한국어 번역 뜻은?`;
+
+                speakText(q.target.food.name);
+
+                q.choices.forEach(choice => {
+                    const btn = document.createElement('button');
+                    btn.onclick = () => submitQuizAnswer(choice, btn);
+                    btn.className = "quiz-opt-btn p-3.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-slate-300 text-slate-700 text-xs font-bold rounded-xl transition flex items-center justify-between";
+                    btn.innerHTML = `
+                        <span>${choice.food.koName}</span>
+                        <div class="choice-marker w-3.5 h-3.5 rounded-full border border-slate-300"></div>
+                    `;
+                    optionsContainer.appendChild(btn);
+                });
+            }
+        }
+
+        function submitQuizAnswer(chosenItem, element) {
+            const btns = document.querySelectorAll('.quiz-opt-btn');
+            btns.forEach(b => b.disabled = true);
+
+            const q = quizQuestions[currentQuestionIndex];
+            const isCorrect = chosenItem.h === q.target.h;
+
+            if (isCorrect) {
+                quizScore += 10;
+                quizCorrectAnswers++;
+                element.className = "quiz-opt-btn p-3.5 bg-emerald-50 border-2 border-emerald-500 text-emerald-800 text-xs font-bold rounded-xl flex items-center justify-between transition";
+                element.querySelector('.choice-marker').className = "choice-marker w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[8px] border-0";
+                element.querySelector('.choice-marker').innerHTML = '<i class="fa-solid fa-check"></i>';
+                showToast("정답입니다! 👏", "success");
+            } else {
+                quizLives--;
+                element.className = "quiz-opt-btn p-3.5 bg-rose-50 border-2 border-rose-500 text-rose-800 text-xs font-bold rounded-xl flex items-center justify-between transition";
+                element.querySelector('.choice-marker').className = "choice-marker w-4 h-4 rounded-full bg-rose-500 text-white flex items-center justify-center text-[8px] border-0";
+                element.querySelector('.choice-marker').innerHTML = '<i class="fa-solid fa-x"></i>';
+                
+                btns.forEach(b => {
+                    const isKanaToRomaji = activeQuizType === 'kana_to_romaji';
+                    const targetLabel = isKanaToRomaji ? `${q.target.r} (${q.target.ko})` : q.target.food.koName;
+                    if (b.innerText.includes(targetLabel)) {
+                        b.className = "quiz-opt-btn p-3.5 bg-emerald-50 border-2 border-emerald-500 text-emerald-800 text-xs font-bold rounded-xl flex items-center justify-between transition";
+                        b.querySelector('.choice-marker').className = "choice-marker w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[8px] border-0";
+                        b.querySelector('.choice-marker').innerHTML = '<i class="fa-solid fa-check"></i>';
+                    }
+                });
+
+                showToast("틀렸습니다! 다음 기회에!", "error");
+            }
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                renderCurrentQuestion();
+            }, 1500);
+        }
+
+        function speakQuizItem() {
+            const q = quizQuestions[currentQuestionIndex];
+            if (!q) return;
+            const isKanaToRomaji = activeQuizType === 'kana_to_romaji';
+            speakText(isKanaToRomaji ? q.target.h : q.target.food.name);
+        }
+
+        function endQuizSession(aborted = false) {
+            document.getElementById('quiz-game-panel').classList.add('hidden');
+            if (aborted) {
+                document.getElementById('quiz-start-panel').classList.remove('hidden');
+                showToast("퀴즈 세션이 취소되었습니다.", "info");
+                return;
+            }
+
+            document.getElementById('quiz-result-panel').classList.remove('hidden');
+            document.getElementById('quiz-result-score').innerText = quizScore;
+            document.getElementById('quiz-result-correct').innerText = `${quizCorrectAnswers} / ${quizQuestions.length}`;
+
+            let comment = "처음부터 고수가 될 수는 없죠! 단어장을 살펴보고 다시 시도해봐요!";
+            if(quizCorrectAnswers === 5) {
+                comment = "대단합니다! 만점입니다! 일어 마스터를 달성하셨습니다! 🎉";
+            } else if(quizCorrectAnswers >= 3) {
+                comment = "충분히 뛰어난 성적입니다! 조금만 보충하면 만점도 노릴 수 있겠어요!";
+            }
+            document.getElementById('quiz-result-subtitle').innerText = comment;
+        }
+
+        function restartQuiz() {
+            document.getElementById('quiz-result-panel').classList.add('hidden');
+            document.getElementById('quiz-start-panel').classList.remove('hidden');
+        }
+
+        function initNotionConfigUI() {
+            const keyInput = document.getElementById('notion-api-key');
+            const dbInput = document.getElementById('notion-db-id');
+            const proxyInput = document.getElementById('notion-proxy-url');
+
+            if(keyInput && notionConfig.apiKey) keyInput.value = notionConfig.apiKey;
+            if(dbInput && notionConfig.dbId) dbInput.value = notionConfig.dbId;
+            if(proxyInput && notionConfig.proxy) proxyInput.value = notionConfig.proxy;
+
+            updateNotionIndicator();
+        }
+
+        function openNotionConfigModal() {
+            const modal = document.getElementById('notion-config-modal');
+            const container = document.getElementById('notion-modal-container');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                container.classList.remove('scale-95', 'opacity-0');
+                container.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeNotionConfigModal() {
+            const modal = document.getElementById('notion-config-modal');
+            const container = document.getElementById('notion-modal-container');
+            container.classList.add('scale-95', 'opacity-0');
+            container.classList.remove('scale-100', 'opacity-100');
+            setTimeout(() => modal.classList.add('hidden'), 200);
+        }
+
+        function saveNotionConfig() {
+            const key = document.getElementById('notion-api-key').value.trim();
+            const db = document.getElementById('notion-db-id').value.trim();
+            const proxy = document.getElementById('notion-proxy-url').value.trim();
+
+            if (!key || !db) {
+                showToast("Notion API 키와 데이터베이스 ID를 모두 입력해주세요.", "error");
+                return;
+            }
+
+            notionConfig = { apiKey: key, dbId: db, proxy: proxy };
+            localStorage.setItem('notionConfig', JSON.stringify(notionConfig));
+            
+            showToast("Notion 설정이 정상적으로 저장되었습니다.", "success");
+            closeNotionConfigModal();
+            updateNotionIndicator();
+            loadUsersFromNotion();
+        }
+
+        function clearNotionConfig() {
+            notionConfig = { apiKey: "", dbId: "", proxy: "https://api.allorigins.win/raw?url=" };
+            localStorage.removeItem('notionConfig');
+
+            document.getElementById('notion-api-key').value = "";
+            document.getElementById('notion-db-id').value = "";
+            document.getElementById('notion-proxy-url').value = "https://api.allorigins.win/raw?url=";
+
+            showToast("Notion 연동 해제. 로컬 시뮬레이션 브라우저 모드로 작동합니다.", "info");
+            closeNotionConfigModal();
+            updateNotionIndicator();
+            loadUsersFromNotion();
+        }
+
+        function updateNotionIndicator() {
+            const badge = document.getElementById('notion-status-badge');
+            const light = document.getElementById('notion-status-light');
+            const text = document.getElementById('notion-status-text');
+            const icon = document.getElementById('notion-connection-indicator');
+
+            if (notionConfig.apiKey && notionConfig.dbId) {
+                if(badge) badge.innerText = "NOTION CONNECTED";
+                if(badge) badge.className = "text-[10px] text-emerald-700 font-bold uppercase bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full";
+                if(light) light.className = "w-2 h-2 rounded-full bg-emerald-500";
+                if(text) text.innerText = `현재 데이터베이스(ID: ${notionConfig.dbId.substring(0,8)}...)와 안전하게 연동되었습니다.`;
+                if(icon) {
+                    icon.className = "fa-solid fa-network-wired text-sm text-emerald-500";
+                    icon.classList.remove('animate-pulse');
+                }
+            } else {
+                if(badge) badge.innerText = "LOCAL SIMULATED MODE";
+                if(badge) badge.className = "text-[10px] text-amber-700 font-bold uppercase bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-full";
+                if(light) light.className = "w-2 h-2 rounded-full bg-amber-500 animate-pulse";
+                if(text) text.innerText = "Notion 설정이 등록되어 있지 않습니다. 로컬 브라우저 세션 모드로 데이터가 기록됩니다.";
+                if(icon) icon.className = "fa-solid fa-network-wired text-sm text-amber-500 animate-pulse";
+            }
+        }
+
+        // Calendar Utility Functions
+        function getMondayOfDate(d) {
+            d = new Date(d);
+            const day = d.getDay();
+            // Adjust when day is Sunday (0) to make Monday (1) the start of the week
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1); 
+            return new Date(d.setDate(diff));
+        }
+
+        function getWeekDates(startDate) {
+            let dates = [];
+            let temp = new Date(startDate);
+            for (let i = 0; i < 7; i++) {
+                dates.push(temp.toISOString().split('T')[0]);
+                temp.setDate(temp.getDate() + 1);
+            }
+            return dates;
+        }
+
+        function navigateWeek(direction) {
+            if (direction === 0) {
+                currentWeekStartDate = getMondayOfDate(new Date());
+            } else {
+                currentWeekStartDate.setDate(currentWeekStartDate.getDate() + (direction * 7));
+            }
+            renderWeeklyAttendance();
+        }
+
+        // Attendance 3-State Helpers (none, present, absent)
+        function getAttendanceStatus(user, dateStr) {
+            const match = user.attendance.find(item => item.startsWith(dateStr));
+            if (!match) return 'none'; // 미체크
+            if (match.endsWith(':N')) return 'absent'; // 불참
+            return 'present'; // 참석
+        }
+
+        async function cycleAttendanceState(userIndex, targetDate) {
+            const user = usersData[userIndex];
+            const currentStatus = getAttendanceStatus(user, targetDate);
+
+            // 기존 기록 우선 제거
+            user.attendance = user.attendance.filter(item => !item.startsWith(targetDate));
+
+            let nextStatus = 'none';
+            if (currentStatus === 'none') {
+                user.attendance.push(`${targetDate}:Y`); // 또는 접미사 없이 날짜만 넣어도 '참석'으로 처리 가능하지만 명시적으로 :Y 부여
+                nextStatus = 'present';
+            } else if (currentStatus === 'present') {
+                user.attendance.push(`${targetDate}:N`); // 불참 상태
+                nextStatus = 'absent';
+            } else if (currentStatus === 'absent') {
+                // 이미 위에서 제거되었으므로 'none' 상태로 유지
+                nextStatus = 'none';
+            }
+
+            // 로컬 스토리지 상태 저장
+            localStorage.setItem('localUsersData', JSON.stringify(usersData));
+
+            // 화면 신속 업데이트
+            renderWeeklyAttendance();
+            renderUserDirectory(usersData);
+
+            // Notion 동기화 여부 검사
+            const hasNotion = notionConfig.apiKey && notionConfig.dbId && user.pageId;
+            if (!hasNotion) {
+                const statusLabels = { 'present': '참석 🟢', 'absent': '불참 🔴', 'none': '미체크 ⚪' };
+                showToast(`[로컬 저장] ${user.name} 사원: ${targetDate} [${statusLabels[nextStatus]}]`, "success");
+                return;
+            }
+
+            // Notion에 데이터 패치 요청 전달
+            const updatePageUrl = `https://api.notion.com/v1/pages/${user.pageId}`;
+            const proxyTargetUrl = notionConfig.proxy + encodeURIComponent(updatePageUrl);
+
+            // Multi-select 형태의 Notion 저장 형식으로 인코딩
+            const multiSelectArray = user.attendance.map(item => ({ name: item }));
+
+            const payload = {
+                properties: {
+                    "출석일": {
+                        multi_select: multiSelectArray
+                    }
+                }
+            };
+
+            try {
+                const response = await fetch(proxyTargetUrl, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${notionConfig.apiKey}`,
+                        'Notion-Version': '2022-06-28',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error("Notion API Update Error");
+
+                showToast(`[Notion 동기화] ${user.name} 사원의 주간 출석 상태를 업데이트했습니다.`, "success");
+            } catch (err) {
+                console.error("Notion Patch Error:", err);
+                showToast("Notion 서버 전송 실패. 로컬 데이터가 오프라인으로 보존됩니다.", "error");
+            }
+        }
+
+        async function loadUsersFromNotion() {
+            const syncIcon = document.getElementById('btn-sync-icon');
+            if(syncIcon) syncIcon.classList.add('fa-spin');
+
+            const hasNotion = notionConfig.apiKey && notionConfig.dbId;
+
+            if (!hasNotion) {
+                // FALLBACK: Use Local Browser Storage
+                renderUserDirectory(usersData);
+                renderWeeklyAttendance();
+                if(syncIcon) syncIcon.classList.remove('fa-spin');
+                return;
+            }
+
+            const queryUrl = `https://api.notion.com/v1/databases/${notionConfig.dbId}/query`;
+            const proxyTargetUrl = notionConfig.proxy + encodeURIComponent(queryUrl);
+
+            try {
+                const response = await fetch(proxyTargetUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${notionConfig.apiKey}`,
+                        'Notion-Version': '2022-06-28',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                });
+
+                if (!response.ok) throw new Error("데이터 조회 실패");
+
+                const result = await response.json();
+                
+                // Decode Notion response object to simple usersData
+                const fetchedUsers = result.results.map(page => {
+                    const idProp = page.properties['사번'] || page.properties['ID'];
+                    const nameProp = page.properties['이름'] || page.properties['Name'];
+                    const attProp = page.properties['출석일'];
+
+                    const empId = idProp ? (idProp.title?.[0]?.plain_text || idProp.rich_text?.[0]?.plain_text || "") : "";
+                    const nameStr = nameProp ? (nameProp.rich_text?.[0]?.plain_text || nameProp.title?.[0]?.plain_text || "") : "";
+                    
+                    // Parse attendance multi-select dates
+                    let attendanceDates = [];
+                    if (attProp && attProp.multi_select) {
+                        attendanceDates = attProp.multi_select.map(item => item.name);
+                    }
+
+                    return {
+                        pageId: page.id,
+                        id: empId,
+                        name: nameStr,
+                        attendance: attendanceDates
+                    };
+                }).filter(u => u.id !== "" && u.name !== "");
+
+                // Sync to local state
+                usersData = fetchedUsers;
+                localStorage.setItem('localUsersData', JSON.stringify(usersData));
+                
+                renderUserDirectory(usersData);
+                renderWeeklyAttendance();
+                showToast("Notion DB와 성공적으로 실시간 동기화되었습니다.", "success");
+            } catch (err) {
+                console.error("Notion API Error:", err);
+                showToast("Notion API 통신 실패. 로컬 캐시 데이터로 백업 구동합니다.", "error");
+                renderUserDirectory(usersData);
+                renderWeeklyAttendance();
+            } finally {
+                if(syncIcon) syncIcon.classList.remove('fa-spin');
+            }
+        }
+
+        async function registerNewUser(event) {
+            event.preventDefault();
+            const idInput = document.getElementById('reg-emp-id');
+            const nameInput = document.getElementById('reg-emp-name');
+
+            const idVal = idInput.value.trim();
+            const nameVal = nameInput.value.trim();
+
+            if (!idVal || !nameVal) return;
+
+            // Check duplicate ID
+            if (usersData.some(u => u.id === idVal)) {
+                showToast(`이미 등록된 사번입니다: ${idVal}`, "error");
+                return;
+            }
+
+            const hasNotion = notionConfig.apiKey && notionConfig.dbId;
+
+            if (!hasNotion) {
+                // Local Mode Insert
+                usersData.push({ id: idVal, name: nameVal, attendance: [] });
+                localStorage.setItem('localUsersData', JSON.stringify(usersData));
+                
+                showToast(`[로컬 등록 완료] ${nameVal} 사원이 등록되었습니다.`, "success");
+                idInput.value = "";
+                nameInput.value = "";
+                renderUserDirectory(usersData);
+                renderWeeklyAttendance();
+                return;
+            }
+
+            // Notion Insert Request Creation
+            showToast("Notion 데이터베이스에 사원 생성 요청을 송신하는 중...", "info");
+            const createUrl = "https://api.notion.com/v1/pages";
+            const proxyTargetUrl = notionConfig.proxy + encodeURIComponent(createUrl);
+
+            const payload = {
+                parent: { database_id: notionConfig.dbId },
+                properties: {
+                    "사번": {
+                        title: [
+                            { text: { content: idVal } }
+                        ]
+                    },
+                    "이름": {
+                        rich_text: [
+                            { text: { content: nameVal } }
+                        ]
+                    },
+                    "출석일": {
+                        multi_select: []
+                    }
+                }
+            };
+
+            try {
+                const response = await fetch(proxyTargetUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${notionConfig.apiKey}`,
+                        'Notion-Version': '2022-06-28',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error("Notion Page Create Error");
+
+                idInput.value = "";
+                nameInput.value = "";
+                showToast(`🎉 [Notion 연동 완료] ${nameVal} 사원이 등록되었습니다.`, "success");
+                loadUsersFromNotion();
+            } catch (err) {
+                console.error(err);
+                showToast("Notion 전송 오류. 로컬 등록으로 대체 동작합니다.", "error");
+            }
+        }
+
+        function renderWeeklyAttendance() {
+            const weekDates = getWeekDates(currentWeekStartDate);
+            
+            // Render Date Range text (e.g., 2026-07-06 ~ 2026-07-12)
+            const rangeDisplay = document.getElementById('weekly-range-display');
+            if (rangeDisplay) {
+                rangeDisplay.innerText = `기간: ${weekDates[0]} (월) ~ ${weekDates[6]} (일)`;
+            }
+
+            // Update Header labels to include dates
+            const daysShort = ["월", "화", "수", "목", "금", "토", "일"];
+            for (let i = 0; i < 7; i++) {
+                const th = document.getElementById(`th-day-${i}`);
+                if (th) {
+                    const dateObj = new Date(weekDates[i]);
+                    const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+                    const d = String(dateObj.getDate()).padStart(2, '0');
+                    th.innerHTML = `${daysShort[i]}<br><span class="text-[9px] text-slate-400 font-mono">${m}/${d}</span>`;
+                }
+            }
+
+            // Render Table Body Rows
+            const tbody = document.getElementById('weekly-attendance-tbody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (usersData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="p-8 text-center text-slate-400 font-bold">
+                            <i class="fa-solid fa-users-slash text-xl mb-1.5 block text-slate-300"></i>
+                            등록된 사원이 존재하지 않습니다. 왼쪽 카드에서 등록해 주세요.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            usersData.forEach((user, uIdx) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors";
+
+                // Count weekly total statuses
+                const weeklyPresentCount = user.attendance.filter(item => {
+                    const datePart = item.split(':')[0];
+                    return weekDates.includes(datePart) && !item.endsWith(':N');
+                }).length;
+
+                const weeklyAbsentCount = user.attendance.filter(item => {
+                    const datePart = item.split(':')[0];
+                    return weekDates.includes(datePart) && item.endsWith(':N');
+                }).length;
+
+                let rowHTML = `
+                    <td class="p-3 border-r border-slate-100 bg-white sticky left-0 shadow-[2px_0_5px_rgba(0,0,0,0.01)] shrink-0 z-10">
+                        <div class="font-bold text-slate-800">${user.name}</div>
+                        <div class="text-[9px] text-slate-400 font-mono">${user.id}</div>
+                    </td>
+                `;
+
+                // Add 3-State Clickable Cycle Buttons
+                for (let i = 0; i < 7; i++) {
+                    const cellDate = weekDates[i];
+                    const status = getAttendanceStatus(user, cellDate);
+                    
+                    let btnStyle = "bg-slate-50 border-slate-200 text-slate-300 hover:bg-slate-100 hover:text-slate-400";
+                    let iconMarkup = '<i class="fa-solid fa-minus text-[10px]"></i>';
+                    let titleLabel = "미체크 (클릭 시 참석)";
+
+                    if (status === 'present') {
+                        btnStyle = "bg-emerald-500 border-emerald-500 text-white shadow-sm shadow-emerald-100 scale-105";
+                        iconMarkup = '<i class="fa-solid fa-check text-xs"></i>';
+                        titleLabel = "참석 (클릭 시 불참)";
+                    } else if (status === 'absent') {
+                        btnStyle = "bg-rose-500 border-rose-500 text-white shadow-sm shadow-rose-100 scale-105";
+                        iconMarkup = '<i class="fa-solid fa-xmark text-xs"></i>';
+                        titleLabel = "불참 (클릭 시 미체크)";
+                    }
+                    
+                    rowHTML += `
+                        <td class="p-2.5 text-center border-r border-slate-100">
+                            <button onclick="cycleAttendanceState(${uIdx}, '${cellDate}')" title="${titleLabel}" class="w-8 h-8 rounded-xl border flex items-center justify-center transition-all transform active:scale-90 hover:scale-105 mx-auto ${btnStyle}">
+                                ${iconMarkup}
+                            </button>
+                        </td>
+                    `;
+                }
+
+                // Add Weekly total count badge cell (Present vs Absent breakdown)
+                rowHTML += `
+                    <td class="p-2 text-center bg-slate-50 border-l border-slate-100">
+                        <div class="flex flex-col items-center justify-center gap-1">
+                            <span class="text-[9px] px-1.5 py-0.5 rounded-lg bg-emerald-100/70 text-emerald-700 font-extrabold flex items-center gap-0.5" title="이번 주 참석">
+                                <i class="fa-solid fa-circle-check text-[8px]"></i> ${weeklyPresentCount}
+                            </span>
+                            <span class="text-[9px] px-1.5 py-0.5 rounded-lg bg-rose-100/70 text-rose-700 font-extrabold flex items-center gap-0.5" title="이번 주 불참">
+                                <i class="fa-solid fa-circle-xmark text-[8px]"></i> ${weeklyAbsentCount}
+                            </span>
+                        </div>
+                    </td>
+                `;
+
+                tr.innerHTML = rowHTML;
+                tbody.appendChild(tr);
+            });
+
+            // Sync total registered users counts
+            const totalCountEl = document.getElementById('total-user-count');
+            if (totalCountEl) totalCountEl.innerText = usersData.length;
+        }
+
+        async function toggleWeeklyAttendanceState(userIndex, targetDate, checkboxEl) {
+            // Deprecated in favor of cycleAttendanceState
+            // Left intact for backward safety
+        }
+
+        function deleteUser(index) {
+            const user = usersData[index];
+            if (!user) return;
+
+            openCustomConfirm(`'${user.name} (${user.id})' 사원 정보를 영구히 삭제하시겠습니까?`, async () => {
+                const hasNotion = notionConfig.apiKey && notionConfig.dbId && user.pageId;
+
+                if (!hasNotion) {
+                    // Local Mode Delete
+                    usersData.splice(index, 1);
+                    localStorage.setItem('localUsersData', JSON.stringify(usersData));
+                    
+                    showToast(`[로컬 삭제 완료] ${user.name} 사원이 정상 삭제되었습니다.`, "success");
+                    renderUserDirectory(usersData);
+                    renderWeeklyAttendance();
+                    return;
+                }
+
+                // Notion Mode Delete (Archive the page)
+                showToast("Notion 데이터베이스에서 사원 정보를 삭제 중...", "info");
+                const deleteUrl = `https://api.notion.com/v1/pages/${user.pageId}`;
+                const proxyTargetUrl = notionConfig.proxy + encodeURIComponent(deleteUrl);
+
+                const payload = {
+                    archived: true
+                };
+
+                try {
+                    const response = await fetch(proxyTargetUrl, {
+                        method: 'PATCH',
+                        headers: {
+                            'Authorization': `Bearer ${notionConfig.apiKey}`,
+                            'Notion-Version': '2022-06-28',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) throw new Error("Notion Page Archive Error");
+
+                    showToast(`🎉 [Notion 동기화 완료] ${user.name} 사원이 삭제되었습니다.`, "success");
+                    loadUsersFromNotion();
+                } catch (err) {
+                    console.error("Notion Delete Error:", err);
+                    showToast("Notion 삭제 요청이 실패했습니다. 네트워크 설정을 점검해 주세요.", "error");
+                }
+            });
+        }
+
+        function renderUserDirectory(list) {
+            const container = document.getElementById('user-directory-container');
+            if(!container) return;
+            container.innerHTML = '';
+
+            if (list.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4 text-[10px] text-slate-400 border border-dashed border-slate-100 rounded-xl">
+                        등록된 사원이 존재하지 않습니다.
+                    </div>
+                `;
+                return;
+            }
+
+            list.forEach((user, idx) => {
+                // Calculate cumulative Present vs Absent from user's full history
+                const totalPresent = user.attendance.filter(item => !item.endsWith(':N')).length;
+                const totalAbsent = user.attendance.filter(item => item.endsWith(':N')).length;
+
+                const item = document.createElement('div');
+                item.className = "flex items-center justify-between p-2 bg-slate-50 rounded-xl text-[11px] border border-slate-100 gap-1.5 hover:bg-slate-100/60 transition duration-150";
+                item.innerHTML = `
+                    <div class="flex items-center space-x-1.5 min-w-0 flex-grow">
+                        <span class="w-1.5 h-1.5 rounded-full bg-violet-600 shrink-0"></span>
+                        <span class="font-bold text-slate-700 truncate">${user.name}</span>
+                        <span class="text-[9px] text-slate-400 font-mono shrink-0">(${user.id})</span>
+                    </div>
+                    <div class="flex items-center space-x-1.5 shrink-0">
+                        <div class="flex flex-col text-[8px] leading-tight items-end">
+                            <span class="text-emerald-600 font-extrabold">참석 ${totalPresent}회</span>
+                            <span class="text-rose-500 font-extrabold">불참 ${totalAbsent}회</span>
+                        </div>
+                        <button onclick="deleteUser(${idx})" class="p-1 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition duration-150" title="사원 정보 삭제">
+                            <i class="fa-solid fa-trash-can text-[10px]"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // Dialog Confirmation Modal system alternatives to window.confirm/alert
+        let activeConfirmCallback = null;
+        function openCustomConfirm(message, callback) {
+            activeConfirmCallback = callback;
+            
+            // Build simple neat inline DOM confirm modal dynamically
+            const modal = document.createElement('div');
+            modal.id = 'custom-confirm-modal';
+            modal.className = "fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs transition duration-300";
+            
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl p-5 max-w-sm w-full shadow-2xl border border-slate-100 animate-in fade-in zoom-in duration-200">
+                    <div class="w-10 h-10 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center text-lg mb-3">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-slate-800">주의 및 안내 확인</h3>
+                    <p class="text-xs text-slate-500 mt-1 leading-normal">${message}</p>
+                    
+                    <div class="flex gap-2 mt-4 pt-1 border-t border-slate-100">
+                        <button onclick="handleConfirmModalAccept()" class="flex-1 py-2 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl transition text-xs shadow-xs">
+                            실행하기
+                        </button>
+                        <button onclick="handleConfirmModalClose()" class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl transition text-xs">
+                            취소
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function handleConfirmModalAccept() {
+            if (activeConfirmCallback) activeConfirmCallback();
+            handleConfirmModalClose();
+        }
+
+        function handleConfirmModalClose() {
+            const modal = document.getElementById('custom-confirm-modal');
+            if (modal) {
+                modal.remove();
+            }
+            activeConfirmCallback = null;
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('notification-toast');
+            const msgEl = document.getElementById('toast-message');
+            const iconBg = document.getElementById('toast-icon-bg');
+            const icon = document.getElementById('toast-icon');
+
+            msgEl.innerText = message;
+
+            if (type === 'success') {
+                iconBg.className = "w-6 h-6 bg-emerald-500 rounded-lg flex items-center justify-center text-xs text-white shrink-0";
+                icon.className = "fa-solid fa-circle-check text-white";
+            } else if (type === 'error') {
+                iconBg.className = "w-6 h-6 bg-rose-500 rounded-lg flex items-center justify-center text-xs text-white shrink-0";
+                icon.className = "fa-solid fa-triangle-exclamation text-white";
+            } else {
+                iconBg.className = "w-6 h-6 bg-sky-500 rounded-lg flex items-center justify-center text-xs text-white shrink-0";
+                icon.className = "fa-solid fa-circle-info text-white";
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 3000);
+        }
+
+        function openSettingsModal() {
+            const modal = document.getElementById('info-modal');
+            const container = document.getElementById('modal-container');
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                container.classList.remove('scale-95', 'opacity-0');
+                container.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeSettingsModal() {
+            const modal = document.getElementById('info-modal');
+            const container = document.getElementById('modal-container');
+            
+            container.classList.add('scale-95', 'opacity-0');
+            container.classList.remove('scale-100', 'opacity-100');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 250);
+        }
+
+        function populateNoticeAuthorOptions() {
+            const select = document.getElementById('notice-author-select');
+            if(!select) return;
+            select.innerHTML = '<option value="custom">✍️ 직접 입력 / 외부 작성자</option>';
+            usersData.forEach(user => {
+                const opt = document.createElement('option');
+                opt.value = user.name;
+                opt.innerText = `${user.name} (${user.id})`;
+                select.appendChild(opt);
+            });
+            toggleAuthorCustomInput();
+        }
+
+        function toggleAuthorCustomInput() {
+            const select = document.getElementById('notice-author-select');
+            const customInput = document.getElementById('notice-author-custom');
+            if(!select || !customInput) return;
+            if (select.value === 'custom') {
+                customInput.classList.remove('hidden');
+                customInput.required = true;
+            } else {
+                customInput.classList.add('hidden');
+                customInput.required = false;
+            }
+        }
+
+        function registerNewNotice(event) {
+            event.preventDefault();
+            const category = document.getElementById('notice-category').value;
+            const select = document.getElementById('notice-author-select').value;
+            let author = select;
+            if (select === 'custom') {
+                author = document.getElementById('notice-author-custom').value.trim();
+            }
+            const content = document.getElementById('notice-content').value.trim();
+
+            if (!author || !content) {
+                showToast("작성자와 내용을 모두 입력해 주세요.", "error");
+                return;
+            }
+
+            const now = new Date();
+            const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+            const newNotice = {
+                id: 'notice_' + Date.now(),
+                type: category,
+                author: author,
+                content: content,
+                createdAt: dateStr
+            };
+
+            noticesData.unshift(newNotice);
+            localStorage.setItem('localNoticesData', JSON.stringify(noticesData));
+
+            // Reset Fields
+            document.getElementById('notice-content').value = '';
+            if (select === 'custom') {
+                document.getElementById('notice-author-custom').value = '';
+            }
+
+            showToast("📢 알림이 정상 등록되었습니다.", "success");
+            renderNotices();
+        }
+
+        function renderNotices() {
+            const container = document.getElementById('notices-stream-container');
+            if(!container) return;
+            container.innerHTML = '';
+
+            let filtered = noticesData;
+            if (activeNoticeFilter !== 'all') {
+                filtered = noticesData.filter(n => n.type === activeNoticeFilter);
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-xs text-slate-400 border border-dashed border-slate-100 rounded-2xl bg-slate-50/50">
+                        <i class="fa-solid fa-folder-open text-2xl mb-2 block text-slate-300"></i>
+                        등록된 알림 사항이 없습니다. 알림을 가장 먼저 공유해 보세요!
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(notice => {
+                let badgeClass = "bg-sky-50 text-sky-700 border-sky-100";
+                let badgeText = "📢 공지사항";
+                let borderClass = "border-sky-100";
+                
+                if (notice.type === 'homework') {
+                    badgeClass = "bg-emerald-50 text-emerald-700 border-emerald-100";
+                    badgeText = "📝 과제";
+                    borderClass = "border-emerald-100";
+                } else if (notice.type === 'share') {
+                    badgeClass = "bg-amber-50 text-amber-700 border-amber-100";
+                    badgeText = "💡 공유사항";
+                    borderClass = "border-amber-100";
+                }
+
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-xl border bg-white shadow-xs ${borderClass} flex flex-col justify-between hover:shadow-md transition-shadow duration-200`;
+                
+                const escapedContent = notice.content
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+
+                card.innerHTML = `
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] px-2 py-0.5 border rounded-full font-bold ${badgeClass}">${badgeText}</span>
+                            <button onclick="deleteNotice('${notice.id}')" class="p-1 text-slate-300 hover:text-rose-500 rounded transition" title="알림 삭제">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                        </div>
+                        <p class="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">${escapedContent}</p>
+                    </div>
+                    <div class="mt-3 pt-2.5 border-t border-dashed border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
+                        <span class="font-bold text-slate-600"><i class="fa-regular fa-user mr-1 text-[9px]"></i>${notice.author}</span>
+                        <span><i class="fa-regular fa-clock mr-1 text-[9px]"></i>${notice.createdAt}</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function filterNotices(type) {
+            activeNoticeFilter = type;
+            const filters = ['all', 'notice', 'homework', 'share'];
+            filters.forEach(f => {
+                const btn = document.getElementById(`btn-notice-filter-${f}`);
+                if (btn) {
+                    if (f === type) {
+                        btn.className = "px-2.5 py-1.5 bg-sky-500 text-white rounded-lg text-[10px] font-bold transition";
+                    } else {
+                        btn.className = "px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-[10px] font-bold transition";
+                    }
+                }
+            });
+            renderNotices();
+        }
+
+        function deleteNotice(id) {
+            openCustomConfirm("해당 알림글을 영구히 삭제하시겠습니까?", () => {
+                noticesData = noticesData.filter(n => n.id !== id);
+                localStorage.setItem('localNoticesData', JSON.stringify(noticesData));
+                showToast("알림글이 성공적으로 삭제되었습니다.", "info");
+                renderNotices();
+            });
+        }
+    </script>
+</body>
+</html>
