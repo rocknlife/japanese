@@ -73,18 +73,19 @@ export default function AttendanceTab({
       onUsersChange(newUsers);
 
       const statusLabels = { present: "참석", absent: "불참", none: "미체크" };
-      const hasNotion = notionConfig.apiKey && notionConfig.dbId && user.pageId;
+      const label = statusLabels[nextStatus];
 
-      if (!hasNotion) {
-        showToast(`[로컬 저장] ${user.name}: ${targetDate} [${statusLabels[nextStatus]}]`, "success");
+      // Notion 우선: pageId 없으면 Notion 등록이 안 된 사원이므로 로컬 저장
+      if (!user.pageId) {
+        showToast(`[로컬 저장] ${user.name}: ${targetDate} [${label}]`, "success");
         return;
       }
 
       try {
-        await updateAttendanceInNotion(notionConfig, user.pageId!, updated);
-        showToast(`[Notion 동기화] ${user.name}의 출석 상태를 업데이트했습니다.`, "success");
+        await updateAttendanceInNotion(notionConfig, user.pageId, updated);
+        showToast(`${user.name}: ${targetDate} [${label}] — Notion 동기화 완료`, "success");
       } catch {
-        showToast("Notion 서버 전송 실패. 로컬 데이터가 보존됩니다.", "error");
+        showToast("Notion 전송 실패. 화면에는 반영됐으나 DB 저장은 실패했습니다.", "error");
       }
     },
     [usersData, notionConfig, onUsersChange, showToast]
@@ -110,6 +111,14 @@ export default function AttendanceTab({
     }
   }, [notionConfig, onUsersChange, showToast]);
 
+  // Auto-sync from Notion when tab mounts and connection is available
+  useEffect(() => {
+    if (notionConfig.apiKey && notionConfig.dbId) {
+      loadFromNotion();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const registerUser = async (e: React.FormEvent) => {
     e.preventDefault();
     const idVal = empId.trim();
@@ -120,42 +129,42 @@ export default function AttendanceTab({
       return;
     }
 
-    const hasNotion = notionConfig.apiKey && notionConfig.dbId;
-    if (!hasNotion) {
-      onUsersChange([...usersData, { id: idVal, name: nameVal, attendance: [] }]);
-      showToast(`[로컬 등록] ${nameVal} 사원이 등록되었습니다.`, "success");
-      setEmpId("");
-      setEmpName("");
-      return;
-    }
+    const isNotionReady = notionConfig.apiKey && notionConfig.dbId;
 
-    showToast("Notion에 사원 생성 중...", "info");
-    try {
-      await createUserInNotion(notionConfig, idVal, nameVal);
+    if (isNotionReady) {
+      showToast("Notion에 사원 생성 중...", "info");
+      try {
+        await createUserInNotion(notionConfig, idVal, nameVal);
+        setEmpId("");
+        setEmpName("");
+        showToast(`${nameVal} 사원이 Notion DB에 등록되었습니다.`, "success");
+        await loadFromNotion();
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "알 수 없는 오류";
+        showToast(`Notion 등록 실패: ${msg}`, "error");
+      }
+    } else {
+      onUsersChange([...usersData, { id: idVal, name: nameVal, attendance: [] }]);
+      showToast(`[로컬 저장] ${nameVal} 사원이 등록되었습니다.`, "success");
       setEmpId("");
       setEmpName("");
-      showToast(`[Notion 연동] ${nameVal} 사원이 등록되었습니다.`, "success");
-      loadFromNotion();
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "알 수 없는 오류";
-      showToast(`Notion 전송 오류: ${msg}. 로컬 등록으로 대체합니다.`, "error");
     }
   };
 
   const deleteUser = useCallback(
     async (index: number) => {
       const user = usersData[index];
-      const hasNotion = notionConfig.apiKey && notionConfig.dbId && user.pageId;
-      if (!hasNotion) {
+      if (!user.pageId) {
+        // Notion에 등록되지 않은 로컬 전용 사원
         const newUsers = usersData.filter((_, i) => i !== index);
         onUsersChange(newUsers);
         showToast(`[로컬 삭제] ${user.name} 사원이 삭제되었습니다.`, "success");
         return;
       }
       try {
-        await archivePageInNotion(notionConfig, user.pageId!);
-        showToast(`[Notion] ${user.name} 사원이 삭제되었습니다.`, "success");
-        loadFromNotion();
+        await archivePageInNotion(notionConfig, user.pageId);
+        showToast(`${user.name} 사원이 Notion DB에서 삭제되었습니다.`, "success");
+        await loadFromNotion();
       } catch (err) {
         const msg = err instanceof Error ? err.message : "알 수 없는 오류";
         showToast(`Notion 삭제 요청 실패: ${msg}`, "error");
