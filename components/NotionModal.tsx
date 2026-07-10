@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { NotionConfig } from "@/lib/types";
+import { testNotionConnection } from "@/lib/notionClient";
 
 interface NotionModalProps {
   config: NotionConfig;
@@ -20,13 +21,27 @@ export default function NotionModal({
 }: NotionModalProps) {
   const [apiKey, setApiKey] = useState(config.apiKey);
   const [dbId, setDbId] = useState(config.dbId);
-  const [proxy, setProxy] = useState(config.proxy);
+  const [proxy, setProxy] = useState(config.proxy ?? "");
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{ ok: boolean; title?: string; error?: string } | null>(null);
 
   useEffect(() => {
     setApiKey(config.apiKey);
     setDbId(config.dbId);
-    setProxy(config.proxy);
+    setProxy(config.proxy ?? "");
   }, [config]);
+
+  const handleTest = async () => {
+    if (!apiKey.trim() || !dbId.trim()) {
+      setTestResult({ ok: false, error: "API 키와 데이터베이스 ID를 먼저 입력해주세요." });
+      return;
+    }
+    setTesting(true);
+    setTestResult(null);
+    const result = await testNotionConnection({ apiKey: apiKey.trim(), dbId: dbId.trim(), proxy: "" });
+    setTestResult(result);
+    setTesting(false);
+  };
 
   const handleSave = () => {
     if (!apiKey.trim() || !dbId.trim()) {
@@ -82,7 +97,7 @@ export default function NotionModal({
               <input
                 type="password"
                 value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
+                onChange={(e) => { setApiKey(e.target.value); setTestResult(null); }}
                 placeholder="secret_로 시작하는 토큰 입력..."
                 className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl outline-none focus:border-violet-500 transition"
               />
@@ -94,36 +109,53 @@ export default function NotionModal({
               <input
                 type="text"
                 value={dbId}
-                onChange={(e) => setDbId(e.target.value)}
+                onChange={(e) => { setDbId(e.target.value); setTestResult(null); }}
                 placeholder="32자리 데이터베이스 해시값 입력..."
                 className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl outline-none focus:border-violet-500 transition"
               />
             </div>
-            <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">
-                우회 CORS Proxy 서버 주소
-              </label>
-              <input
-                type="text"
-                value={proxy}
-                onChange={(e) => setProxy(e.target.value)}
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl outline-none focus:border-violet-500 transition text-slate-500 font-mono text-[9px]"
-              />
-            </div>
+
+            {/* Connection test result */}
+            {testResult && (
+              <div className={`flex items-start gap-2 px-3 py-2.5 rounded-xl text-[10px] font-bold border ${testResult.ok ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "bg-rose-50 text-rose-700 border-rose-100"}`}>
+                <i className={`fa-solid mt-0.5 ${testResult.ok ? "fa-circle-check" : "fa-circle-xmark"} text-xs shrink-0`}></i>
+                <span>
+                  {testResult.ok
+                    ? `연결 성공! DB 이름: "${testResult.title}"`
+                    : `연결 실패: ${testResult.error}`}
+                </span>
+              </div>
+            )}
+
+            <p className="text-[10px] text-slate-400 bg-slate-50 rounded-xl px-3 py-2 leading-relaxed">
+              <i className="fa-solid fa-shield-halved mr-1 text-slate-300"></i>
+              API 키는 서버에서만 사용되며 브라우저에 노출되지 않습니다.
+              Notion 통합 설정에서 해당 DB에 대한 <strong>읽기/쓰기 권한</strong>을 허용해 주세요.
+            </p>
           </div>
-          <div className="flex gap-2 pt-1.5">
+          <div className="flex flex-col gap-2 pt-1.5">
             <button
-              onClick={handleSave}
-              className="flex-1 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl transition text-[11px] shadow-sm"
+              onClick={handleTest}
+              disabled={testing}
+              className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 text-slate-700 font-bold rounded-xl transition text-[11px] flex items-center justify-center gap-1.5"
             >
-              설정 저장 및 연동하기
+              <i className={`fa-solid fa-plug text-[10px] ${testing ? "animate-pulse" : ""}`}></i>
+              {testing ? "연결 확인 중..." : "연결 테스트"}
             </button>
-            <button
-              onClick={handleClear}
-              className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl transition text-[11px]"
-            >
-              연동 해제
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={handleSave}
+                className="flex-1 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl transition text-[11px] shadow-sm"
+              >
+                설정 저장 및 연동하기
+              </button>
+              <button
+                onClick={handleClear}
+                className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl transition text-[11px]"
+              >
+                연동 해제
+              </button>
+            </div>
           </div>
         </div>
       </div>

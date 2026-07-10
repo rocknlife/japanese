@@ -52,7 +52,7 @@ export interface NoticeData {
 export interface NotionConfig {
   apiKey: string;
   dbId: string;
-  proxy: string;
+  proxy?: string; // legacy: no longer used (server-side proxy via /api/notion)
 }
 
 export interface QuizQuestion {

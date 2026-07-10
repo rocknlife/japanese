@@ -52,7 +52,6 @@ export function useNotionConfig() {
   const defaultConfig: NotionConfig = {
     apiKey: "",
     dbId: "",
-    proxy: "https://api.allorigins.win/raw?url=",
   };
 
   const [notionConfig, setNotionConfig] = useState<NotionConfig>(defaultConfig);
@@ -68,11 +67,7 @@ export function useNotionConfig() {
   }, []);
 
   const clear = useCallback(() => {
-    const reset: NotionConfig = {
-      apiKey: "",
-      dbId: "",
-      proxy: "https://api.allorigins.win/raw?url=",
-    };
+    const reset: NotionConfig = { apiKey: "", dbId: "" };
     setNotionConfig(reset);
     localStorage.removeItem("notionConfig");
   }, []);

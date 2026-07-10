@@ -3,6 +3,12 @@
 import { useState, useEffect, useCallback } from "react";
 import type { UserData, NotionConfig } from "@/lib/types";
 import { getMondayOfDate, getWeekDates, getAttendanceStatus } from "@/lib/utils";
+import {
+  fetchUsersFromNotion,
+  createUserInNotion,
+  updateAttendanceInNotion,
+  archivePageInNotion,
+} from "@/lib/notionClient";
 import ConfirmModal from "@/components/ConfirmModal";
 import NotionModal from "@/components/NotionModal";
 
@@ -74,21 +80,8 @@ export default function AttendanceTab({
         return;
       }
 
-      const updatePageUrl = `https://api.notion.com/v1/pages/${user.pageId}`;
-      const proxyTargetUrl = notionConfig.proxy + encodeURIComponent(updatePageUrl);
-      const multiSelectArray = updated.map((item) => ({ name: item }));
-
       try {
-        const res = await fetch(proxyTargetUrl, {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${notionConfig.apiKey}`,
-            "Notion-Version": "2022-06-28",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ properties: { "출석일": { multi_select: multiSelectArray } } }),
-        });
-        if (!res.ok) throw new Error("Notion Update Error");
+        await updateAttendanceInNotion(notionConfig, user.pageId!, updated);
         showToast(`[Notion 동기화] ${user.name}의 출석 상태를 업데이트했습니다.`, "success");
       } catch {
         showToast("Notion 서버 전송 실패. 로컬 데이터가 보존됩니다.", "error");
@@ -105,47 +98,13 @@ export default function AttendanceTab({
       return;
     }
 
-    const queryUrl = `https://api.notion.com/v1/databases/${notionConfig.dbId}/query`;
-    const proxyUrl = notionConfig.proxy + encodeURIComponent(queryUrl);
-
     try {
-      const res = await fetch(proxyUrl, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${notionConfig.apiKey}`,
-          "Notion-Version": "2022-06-28",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({}),
-      });
-      if (!res.ok) throw new Error("Notion Query Error");
-      const result = await res.json();
-
-      const fetched: UserData[] = result.results
-        .map((page: Record<string, unknown>) => {
-          const props = page.properties as Record<string, Record<string, unknown>>;
-          const idProp = props["사번"] || props["ID"];
-          const nameProp = props["이름"] || props["Name"];
-          const attProp = props["출석일"];
-          const empId =
-            (idProp?.title as Array<{ plain_text: string }>)?.[0]?.plain_text ||
-            (idProp?.rich_text as Array<{ plain_text: string }>)?.[0]?.plain_text ||
-            "";
-          const nameStr =
-            (nameProp?.rich_text as Array<{ plain_text: string }>)?.[0]?.plain_text ||
-            (nameProp?.title as Array<{ plain_text: string }>)?.[0]?.plain_text ||
-            "";
-          const attendanceDates: string[] = attProp?.multi_select
-            ? (attProp.multi_select as Array<{ name: string }>).map((x) => x.name)
-            : [];
-          return { pageId: page.id as string, id: empId, name: nameStr, attendance: attendanceDates };
-        })
-        .filter((u: UserData) => u.id !== "" && u.name !== "");
-
+      const fetched = await fetchUsersFromNotion(notionConfig);
       onUsersChange(fetched);
       showToast("Notion DB와 동기화되었습니다.", "success");
-    } catch {
-      showToast("Notion API 통신 실패. 로컬 캐시 데이터로 구동합니다.", "error");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "알 수 없는 오류";
+      showToast(`Notion API 통신 실패: ${msg}`, "error");
     } finally {
       setSyncing(false);
     }
@@ -171,32 +130,15 @@ export default function AttendanceTab({
     }
 
     showToast("Notion에 사원 생성 중...", "info");
-    const createUrl = "https://api.notion.com/v1/pages";
-    const proxyUrl = notionConfig.proxy + encodeURIComponent(createUrl);
     try {
-      const res = await fetch(proxyUrl, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${notionConfig.apiKey}`,
-          "Notion-Version": "2022-06-28",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          parent: { database_id: notionConfig.dbId },
-          properties: {
-            "사번": { title: [{ text: { content: idVal } }] },
-            "이름": { rich_text: [{ text: { content: nameVal } }] },
-            "출석일": { multi_select: [] },
-          },
-        }),
-      });
-      if (!res.ok) throw new Error("Notion Page Create Error");
+      await createUserInNotion(notionConfig, idVal, nameVal);
       setEmpId("");
       setEmpName("");
       showToast(`[Notion 연동] ${nameVal} 사원이 등록되었습니다.`, "success");
       loadFromNotion();
-    } catch {
-      showToast("Notion 전송 오류. 로컬 등록으로 대체합니다.", "error");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "알 수 없는 오류";
+      showToast(`Notion 전송 오류: ${msg}. 로컬 등록으로 대체합니다.`, "error");
     }
   };
 
@@ -210,23 +152,13 @@ export default function AttendanceTab({
         showToast(`[로컬 삭제] ${user.name} 사원이 삭제되었습니다.`, "success");
         return;
       }
-      const deleteUrl = `https://api.notion.com/v1/pages/${user.pageId}`;
-      const proxyUrl = notionConfig.proxy + encodeURIComponent(deleteUrl);
       try {
-        const res = await fetch(proxyUrl, {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${notionConfig.apiKey}`,
-            "Notion-Version": "2022-06-28",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ archived: true }),
-        });
-        if (!res.ok) throw new Error("Notion Archive Error");
+        await archivePageInNotion(notionConfig, user.pageId!);
         showToast(`[Notion] ${user.name} 사원이 삭제되었습니다.`, "success");
         loadFromNotion();
-      } catch {
-        showToast("Notion 삭제 요청 실패. 네트워크를 확인해 주세요.", "error");
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "알 수 없는 오류";
+        showToast(`Notion 삭제 요청 실패: ${msg}`, "error");
       }
     },
     [usersData, notionConfig, onUsersChange, showToast, loadFromNotion]
