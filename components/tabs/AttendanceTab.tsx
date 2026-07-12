@@ -361,14 +361,15 @@ export default function AttendanceTab({
                       사원
                     </th>
                     {DAYS_SHORT.map((day, i) => {
-                      const dateObj = new Date(weekDates[i]);
+                      const dateObj = new Date(weekDates[i] + "T00:00:00");
                       const m = String(dateObj.getMonth() + 1).padStart(2, "0");
                       const d = String(dateObj.getDate()).padStart(2, "0");
-                      const isWeekend = i >= 5;
+                      const isSat = i === 5;
+                      const isSun = i === 6;
                       return (
                         <th
                           key={day}
-                          className={`p-2 text-center font-bold ${isWeekend ? "text-rose-400" : "text-slate-600"}`}
+                          className={`p-2 text-center font-bold ${isSat ? "text-blue-500" : isSun ? "text-rose-400" : "text-slate-600"}`}
                         >
                           {day}
                           <br />
@@ -419,7 +420,7 @@ export default function AttendanceTab({
                               title = "불참 (클릭 시 미체크)";
                             }
                             return (
-                              <td key={date} className={`p-2.5 text-center border-r border-slate-50 ${i >= 5 ? "bg-slate-50/50" : ""}`}>
+                              <td key={date} className={`p-2.5 text-center border-r border-slate-50 ${i === 5 ? "bg-blue-50/30" : i === 6 ? "bg-rose-50/30" : ""}`}>
                                 <button
                                   onClick={() => cycleAttendance(uIdx, date)}
                                   title={title}
