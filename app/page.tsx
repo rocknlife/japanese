@@ -89,8 +89,10 @@ export default function HomePage() {
           <NoticeBoardTab
             noticesData={noticesData}
             usersData={usersData}
+            notionApiKey={notionConfig.apiKey}
             onAddNotice={handleAddNotice}
             onDeleteNotice={handleDeleteNotice}
+            onSyncNotices={setNoticesData}
           />
         )}
         {activeTab === "attendance" && (

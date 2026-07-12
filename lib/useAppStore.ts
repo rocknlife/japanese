@@ -105,6 +105,7 @@ export function useNoticesData() {
   const [noticesData, setNoticesData] = useState<NoticeData[]>([]);
 
   useEffect(() => {
+    // localStorage 캐시를 초기값으로 표시 — Notion 동기화 시 덮어씀
     setNoticesData(getLS<NoticeData[]>("localNoticesData", defaultNotices));
   }, []);
 

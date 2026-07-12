@@ -1,15 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { NoticeData, NoticeType, NoticeFilter } from "@/lib/types";
 import { formatNow } from "@/lib/utils";
+import {
+  fetchNoticesFromNotion,
+  createNoticeInNotion,
+  deleteNoticeInNotion,
+} from "@/lib/notionClient";
 import ConfirmModal from "@/components/ConfirmModal";
 
 interface NoticeBoardTabProps {
   noticesData: NoticeData[];
   usersData: { id: string; name: string }[];
+  notionApiKey: string;
   onAddNotice: (n: NoticeData) => void;
   onDeleteNotice: (id: string) => void;
+  onSyncNotices: (data: NoticeData[]) => void;
 }
 
 const FILTER_LABELS: { key: NoticeFilter; label: string }[] = [
@@ -28,8 +35,10 @@ const TYPE_CONFIG: Record<NoticeType, { badge: string; border: string; badgeText
 export default function NoticeBoardTab({
   noticesData,
   usersData,
+  notionApiKey,
   onAddNotice,
   onDeleteNotice,
+  onSyncNotices,
 }: NoticeBoardTabProps) {
   const [filter, setFilter] = useState<NoticeFilter>("all");
   const [category, setCategory] = useState<NoticeType>("notice");
@@ -37,21 +46,81 @@ export default function NoticeBoardTab({
   const [authorCustom, setAuthorCustom] = useState("");
   const [content, setContent] = useState("");
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
+  const [syncMsg, setSyncMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const showMsg = (text: string, ok: boolean) => {
+    setSyncMsg({ text, ok });
+    setTimeout(() => setSyncMsg(null), 3000);
+  };
+
+  const loadFromNotion = useCallback(async () => {
+    if (!notionApiKey) return;
+    setSyncing(true);
+    try {
+      const data = await fetchNoticesFromNotion(notionApiKey);
+      onSyncNotices(data);
+      showMsg("Notion 알림장 동기화 완료", true);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "알 수 없는 오류";
+      showMsg(`동기화 실패: ${msg}`, false);
+    } finally {
+      setSyncing(false);
+    }
+  }, [notionApiKey, onSyncNotices]);
+
+  // 탭 진입 시 자동 동기화
+  useEffect(() => {
+    if (notionApiKey) {
+      loadFromNotion();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const author = authorSelect === "custom" ? authorCustom.trim() : authorSelect;
     if (!author || !content.trim()) return;
     const now = formatNow();
-    onAddNotice({
-      id: "notice_" + Date.now(),
-      type: category,
-      author,
-      content: content.trim(),
-      createdAt: now,
-    });
+    const noticePayload = { type: category, author, content: content.trim(), createdAt: now };
+
+    if (notionApiKey) {
+      setSyncing(true);
+      try {
+        const pageId = await createNoticeInNotion(notionApiKey, noticePayload);
+        onAddNotice({ id: pageId, ...noticePayload });
+        showMsg("Notion에 알림이 등록되었습니다.", true);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "알 수 없는 오류";
+        showMsg(`Notion 등록 실패: ${msg}`, false);
+      } finally {
+        setSyncing(false);
+      }
+    } else {
+      onAddNotice({ id: "notice_" + Date.now(), ...noticePayload });
+    }
+
     setContent("");
     if (authorSelect === "custom") setAuthorCustom("");
+  };
+
+  const handleDelete = async (id: string) => {
+    if (notionApiKey) {
+      setSyncing(true);
+      try {
+        await deleteNoticeInNotion(notionApiKey, id);
+        onDeleteNotice(id);
+        showMsg("Notion에서 알림이 삭제되었습니다.", true);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "알 수 없는 오류";
+        showMsg(`삭제 실패: ${msg}`, false);
+      } finally {
+        setSyncing(false);
+      }
+    } else {
+      onDeleteNotice(id);
+    }
+    setConfirmId(null);
   };
 
   const filtered =
@@ -63,10 +132,7 @@ export default function NoticeBoardTab({
       {confirmId && (
         <ConfirmModal
           message="해당 알림글을 영구히 삭제하시겠습니까?"
-          onConfirm={() => {
-            onDeleteNotice(confirmId);
-            setConfirmId(null);
-          }}
+          onConfirm={() => handleDelete(confirmId)}
           onCancel={() => setConfirmId(null)}
         />
       )}
@@ -142,13 +208,38 @@ export default function NoticeBoardTab({
               />
             </div>
 
+            {syncMsg && (
+              <div className={`text-[10px] font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 ${syncMsg.ok ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"}`}>
+                <i className={`fa-solid ${syncMsg.ok ? "fa-circle-check" : "fa-circle-xmark"} text-[9px]`}></i>
+                {syncMsg.text}
+              </div>
+            )}
+
             <button
               type="submit"
-              className="w-full py-2.5 bg-sky-500 hover:bg-sky-600 text-white font-black rounded-xl transition text-xs shadow-sm"
+              disabled={syncing}
+              className="w-full py-2.5 bg-sky-500 hover:bg-sky-600 disabled:opacity-50 text-white font-black rounded-xl transition text-xs shadow-sm flex items-center justify-center gap-1.5"
             >
-              <i className="fa-solid fa-paper-plane mr-1.5"></i>알림 등록
+              <i className={`fa-solid ${syncing ? "fa-spinner animate-spin" : "fa-paper-plane"} text-[10px]`}></i>
+              {syncing ? "처리 중..." : "알림 등록"}
             </button>
           </form>
+        </div>
+
+        {/* Notion 연결 상태 */}
+        <div className={`rounded-xl px-3 py-2 flex items-center gap-2 text-[10px] font-bold ${notionApiKey ? "bg-emerald-50 text-emerald-700 border border-emerald-100" : "bg-slate-50 text-slate-400 border border-slate-100"}`}>
+          <i className={`fa-solid ${notionApiKey ? "fa-plug-circle-check" : "fa-plug-circle-xmark"} text-[11px]`}></i>
+          {notionApiKey ? "Notion DB 연결됨" : "Notion 미연결 (로컬 저장)"}
+          {notionApiKey && (
+            <button
+              onClick={loadFromNotion}
+              disabled={syncing}
+              className="ml-auto text-emerald-600 hover:text-emerald-800 disabled:opacity-40 transition"
+              title="새로 고침"
+            >
+              <i className={`fa-solid fa-rotate-right text-[10px] ${syncing ? "animate-spin" : ""}`}></i>
+            </button>
+          )}
         </div>
       </div>
 

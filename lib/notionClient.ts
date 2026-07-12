@@ -1,4 +1,4 @@
-import type { UserData, NotionConfig } from "./types";
+import type { UserData, NotionConfig, NoticeData, NoticeType } from "./types";
 
 // Internal helper: all Notion calls go through our server-side API route
 async function callNotion<T = unknown>(
@@ -133,4 +133,72 @@ export async function archivePageInNotion(
   pageId: string
 ): Promise<void> {
   await callNotion(config.apiKey, `pages/${pageId}`, "PATCH", { archived: true });
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// Notice Board (알림장) — uses NEXT_PUBLIC_NOTION_NOTICE_DB_ID
+// ════════════════════════════════════════════════════════════════════════════
+
+const CATEGORY_MAP: Record<string, NoticeType> = {
+  공지사항: "notice",
+  과제: "homework",
+  공유사항: "share",
+};
+
+const CATEGORY_LABEL: Record<NoticeType, string> = {
+  notice: "공지사항",
+  homework: "과제",
+  share: "공유사항",
+};
+
+function getNoticeDbId(): string {
+  const dbId = process.env.NEXT_PUBLIC_NOTION_NOTICE_DB_ID ?? "";
+  if (!dbId) throw new Error("NEXT_PUBLIC_NOTION_NOTICE_DB_ID 환경변수가 설정되지 않았습니다.");
+  return dbId;
+}
+
+export async function fetchNoticesFromNotion(apiKey: string): Promise<NoticeData[]> {
+  const dbId = getNoticeDbId();
+  const data = await callNotion<NotionQueryResult>(apiKey, `databases/${dbId}/query`, "POST", {
+    sorts: [{ timestamp: "created_time", direction: "descending" }],
+  });
+
+  return data.results.map((page) => {
+    const props = page.properties;
+    const content = getText(props["내용"]);
+    const author = getText(props["작성자"]);
+    const createdAt = getText(props["작성일"]);
+    const categoryLabel = (() => {
+      const p = props["카테고리"];
+      if (p && "select" in p && p.select && typeof p.select === "object" && "name" in (p.select as object)) {
+        return (p.select as { name: string }).name;
+      }
+      return "공지사항";
+    })();
+    const type: NoticeType = CATEGORY_MAP[categoryLabel] ?? "notice";
+    return { id: page.id, type, author, content, createdAt };
+  }).filter((n) => n.content !== "");
+}
+
+export async function createNoticeInNotion(
+  apiKey: string,
+  notice: Omit<NoticeData, "id">
+): Promise<string> {
+  const dbId = getNoticeDbId();
+  const title = notice.content.slice(0, 30) + (notice.content.length > 30 ? "..." : "");
+  const data = await callNotion<{ id: string }>(apiKey, "pages", "POST", {
+    parent: { database_id: dbId },
+    properties: {
+      제목: { title: [{ text: { content: title } }] },
+      내용: { rich_text: [{ text: { content: notice.content } }] },
+      카테고리: { select: { name: CATEGORY_LABEL[notice.type] } },
+      작성자: { rich_text: [{ text: { content: notice.author } }] },
+      작성일: { rich_text: [{ text: { content: notice.createdAt } }] },
+    },
+  });
+  return data.id;
+}
+
+export async function deleteNoticeInNotion(apiKey: string, pageId: string): Promise<void> {
+  await callNotion(apiKey, `pages/${pageId}`, "PATCH", { archived: true });
 }
