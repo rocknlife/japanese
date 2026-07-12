@@ -89,14 +89,8 @@ export function useUsersData() {
   const [usersData, setUsersData] = useState<UserData[]>([]);
 
   useEffect(() => {
-    // Notion 연결 시 stale 캐시 표시 방지: 빈 배열로 시작하고 AttendanceTab이 동기화함
-    const isNotionConnected =
-      !!(process.env.NEXT_PUBLIC_NOTION_API_KEY || getLS<NotionConfig | null>("notionConfig", null)?.apiKey);
-    if (isNotionConnected) {
-      setUsersData([]); // Notion auto-sync will populate this
-    } else {
-      setUsersData(getLS<UserData[]>("localUsersData", defaultUsers));
-    }
+    // 항상 localStorage 캐시를 초기값으로 표시하고, Notion 동기화 시 덮어씀
+    setUsersData(getLS<UserData[]>("localUsersData", defaultUsers));
   }, []);
 
   const persist = useCallback((data: UserData[]) => {
