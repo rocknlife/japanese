@@ -90,6 +90,7 @@ export default function HomePage() {
             noticesData={noticesData}
             usersData={usersData}
             notionApiKey={notionConfig.apiKey}
+            notionDbId={process.env.NEXT_PUBLIC_NOTION_NOTICE_DB_ID ?? ""}
             onAddNotice={handleAddNotice}
             onDeleteNotice={handleDeleteNotice}
             onSyncNotices={setNoticesData}

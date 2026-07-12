@@ -151,14 +151,13 @@ const CATEGORY_LABEL: Record<NoticeType, string> = {
   share: "공유사항",
 };
 
-function getNoticeDbId(): string {
-  const dbId = process.env.NEXT_PUBLIC_NOTION_NOTICE_DB_ID ?? "";
-  if (!dbId) throw new Error("NEXT_PUBLIC_NOTION_NOTICE_DB_ID 환경변수가 설정되지 않았습니다.");
-  return dbId;
+// Notion page ID 형식인지 확인 (32자리 hex 또는 UUID)
+function isNotionPageId(id: string): boolean {
+  return /^[0-9a-f]{32}$/.test(id.replace(/-/g, ""));
 }
 
-export async function fetchNoticesFromNotion(apiKey: string): Promise<NoticeData[]> {
-  const dbId = getNoticeDbId();
+export async function fetchNoticesFromNotion(apiKey: string, dbId: string): Promise<NoticeData[]> {
+  if (!dbId) throw new Error("알림장 데이터베이스 ID가 설정되지 않았습니다.");
   const data = await callNotion<NotionQueryResult>(apiKey, `databases/${dbId}/query`, "POST", {
     sorts: [{ timestamp: "created_time", direction: "descending" }],
   });
@@ -182,9 +181,10 @@ export async function fetchNoticesFromNotion(apiKey: string): Promise<NoticeData
 
 export async function createNoticeInNotion(
   apiKey: string,
+  dbId: string,
   notice: Omit<NoticeData, "id">
 ): Promise<string> {
-  const dbId = getNoticeDbId();
+  if (!dbId) throw new Error("알림장 데이터베이스 ID가 설정되지 않았습니다.");
   const title = notice.content.slice(0, 30) + (notice.content.length > 30 ? "..." : "");
   const data = await callNotion<{ id: string }>(apiKey, "pages", "POST", {
     parent: { database_id: dbId },
@@ -200,5 +200,8 @@ export async function createNoticeInNotion(
 }
 
 export async function deleteNoticeInNotion(apiKey: string, pageId: string): Promise<void> {
+  if (!isNotionPageId(pageId)) {
+    throw new Error("로컬 임시 데이터는 Notion에서 삭제할 수 없습니다.");
+  }
   await callNotion(apiKey, `pages/${pageId}`, "PATCH", { archived: true });
 }

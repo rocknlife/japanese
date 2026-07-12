@@ -14,6 +14,7 @@ interface NoticeBoardTabProps {
   noticesData: NoticeData[];
   usersData: { id: string; name: string }[];
   notionApiKey: string;
+  notionDbId: string;
   onAddNotice: (n: NoticeData) => void;
   onDeleteNotice: (id: string) => void;
   onSyncNotices: (data: NoticeData[]) => void;
@@ -36,6 +37,7 @@ export default function NoticeBoardTab({
   noticesData,
   usersData,
   notionApiKey,
+  notionDbId,
   onAddNotice,
   onDeleteNotice,
   onSyncNotices,
@@ -55,10 +57,10 @@ export default function NoticeBoardTab({
   };
 
   const loadFromNotion = useCallback(async () => {
-    if (!notionApiKey) return;
+    if (!notionApiKey || !notionDbId) return;
     setSyncing(true);
     try {
-      const data = await fetchNoticesFromNotion(notionApiKey);
+      const data = await fetchNoticesFromNotion(notionApiKey, notionDbId);
       onSyncNotices(data);
       showMsg("Notion 알림장 동기화 완료", true);
     } catch (err) {
@@ -67,11 +69,11 @@ export default function NoticeBoardTab({
     } finally {
       setSyncing(false);
     }
-  }, [notionApiKey, onSyncNotices]);
+  }, [notionApiKey, notionDbId, onSyncNotices]);
 
   // 탭 진입 시 자동 동기화
   useEffect(() => {
-    if (notionApiKey) {
+    if (notionApiKey && notionDbId) {
       loadFromNotion();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -84,10 +86,10 @@ export default function NoticeBoardTab({
     const now = formatNow();
     const noticePayload = { type: category, author, content: content.trim(), createdAt: now };
 
-    if (notionApiKey) {
+    if (notionApiKey && notionDbId) {
       setSyncing(true);
       try {
-        const pageId = await createNoticeInNotion(notionApiKey, noticePayload);
+        const pageId = await createNoticeInNotion(notionApiKey, notionDbId, noticePayload);
         onAddNotice({ id: pageId, ...noticePayload });
         showMsg("Notion에 알림이 등록되었습니다.", true);
       } catch (err) {
@@ -105,20 +107,23 @@ export default function NoticeBoardTab({
   };
 
   const handleDelete = async (id: string) => {
-    if (notionApiKey) {
-      setSyncing(true);
-      try {
-        await deleteNoticeInNotion(notionApiKey, id);
-        onDeleteNotice(id);
-        showMsg("Notion에서 알림이 삭제되었습니다.", true);
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : "알 수 없는 오류";
-        showMsg(`삭제 실패: ${msg}`, false);
-      } finally {
-        setSyncing(false);
-      }
-    } else {
+    // Notion page ID가 아닌 로컬 임시 id는 바로 로컬 삭제
+    const isNotionId = /^[0-9a-f]{32}$/.test(id.replace(/-/g, ""));
+    if (!notionApiKey || !isNotionId) {
       onDeleteNotice(id);
+      setConfirmId(null);
+      return;
+    }
+    setSyncing(true);
+    try {
+      await deleteNoticeInNotion(notionApiKey, id);
+      onDeleteNotice(id);
+      showMsg("Notion에서 알림이 삭제되었습니다.", true);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "알 수 없는 오류";
+      showMsg(`삭제 실패: ${msg}`, false);
+    } finally {
+      setSyncing(false);
     }
     setConfirmId(null);
   };
