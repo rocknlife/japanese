@@ -1,4 +1,4 @@
-import type { UserData, NotionConfig } from "./types";
+import type { UserData, NotionConfig, NoticeData, NoticeType } from "./types";
 
 // Internal helper: all Notion calls go through our server-side API route
 async function callNotion<T = unknown>(
@@ -133,4 +133,75 @@ export async function archivePageInNotion(
   pageId: string
 ): Promise<void> {
   await callNotion(config.apiKey, `pages/${pageId}`, "PATCH", { archived: true });
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// Notice Board (알림장) — uses NEXT_PUBLIC_NOTION_NOTICE_DB_ID
+// ════════════════════════════════════════════════════════════════════════════
+
+const CATEGORY_MAP: Record<string, NoticeType> = {
+  공지사항: "notice",
+  과제: "homework",
+  공유사항: "share",
+};
+
+const CATEGORY_LABEL: Record<NoticeType, string> = {
+  notice: "공지사항",
+  homework: "과제",
+  share: "공유사항",
+};
+
+// Notion page ID 형식인지 확인 (32자리 hex 또는 UUID)
+function isNotionPageId(id: string): boolean {
+  return /^[0-9a-f]{32}$/.test(id.replace(/-/g, ""));
+}
+
+export async function fetchNoticesFromNotion(apiKey: string, dbId: string): Promise<NoticeData[]> {
+  if (!dbId) throw new Error("알림장 데이터베이스 ID가 설정되지 않았습니다.");
+  const data = await callNotion<NotionQueryResult>(apiKey, `databases/${dbId}/query`, "POST", {
+    sorts: [{ timestamp: "created_time", direction: "descending" }],
+  });
+
+  return data.results.map((page) => {
+    const props = page.properties;
+    const content = getText(props["내용"]);
+    const author = getText(props["작성자"]);
+    const createdAt = getText(props["작성일"]);
+    const categoryLabel = (() => {
+      const p = props["카테고리"];
+      if (p && "select" in p && p.select && typeof p.select === "object" && "name" in (p.select as object)) {
+        return (p.select as { name: string }).name;
+      }
+      return "공지사항";
+    })();
+    const type: NoticeType = CATEGORY_MAP[categoryLabel] ?? "notice";
+    return { id: page.id, type, author, content, createdAt };
+  }).filter((n) => n.content !== "");
+}
+
+export async function createNoticeInNotion(
+  apiKey: string,
+  dbId: string,
+  notice: Omit<NoticeData, "id">
+): Promise<string> {
+  if (!dbId) throw new Error("알림장 데이터베이스 ID가 설정되지 않았습니다.");
+  const title = notice.content.slice(0, 30) + (notice.content.length > 30 ? "..." : "");
+  const data = await callNotion<{ id: string }>(apiKey, "pages", "POST", {
+    parent: { database_id: dbId },
+    properties: {
+      제목: { title: [{ text: { content: title } }] },
+      내용: { rich_text: [{ text: { content: notice.content } }] },
+      카테고리: { select: { name: CATEGORY_LABEL[notice.type] } },
+      작성자: { rich_text: [{ text: { content: notice.author } }] },
+      작성일: { rich_text: [{ text: { content: notice.createdAt } }] },
+    },
+  });
+  return data.id;
+}
+
+export async function deleteNoticeInNotion(apiKey: string, pageId: string): Promise<void> {
+  if (!isNotionPageId(pageId)) {
+    throw new Error("로컬 임시 데이터는 Notion에서 삭제할 수 없습니다.");
+  }
+  await callNotion(apiKey, `pages/${pageId}`, "PATCH", { archived: true });
 }

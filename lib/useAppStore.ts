@@ -89,14 +89,8 @@ export function useUsersData() {
   const [usersData, setUsersData] = useState<UserData[]>([]);
 
   useEffect(() => {
-    // Notion 연결 시 stale 캐시 표시 방지: 빈 배열로 시작하고 AttendanceTab이 동기화함
-    const isNotionConnected =
-      !!(process.env.NEXT_PUBLIC_NOTION_API_KEY || getLS<NotionConfig | null>("notionConfig", null)?.apiKey);
-    if (isNotionConnected) {
-      setUsersData([]); // Notion auto-sync will populate this
-    } else {
-      setUsersData(getLS<UserData[]>("localUsersData", defaultUsers));
-    }
+    // 항상 localStorage 캐시를 초기값으로 표시하고, Notion 동기화 시 덮어씀
+    setUsersData(getLS<UserData[]>("localUsersData", defaultUsers));
   }, []);
 
   const persist = useCallback((data: UserData[]) => {
@@ -107,10 +101,15 @@ export function useUsersData() {
   return { usersData, setUsersData: persist };
 }
 
+// 알림장 전용 Notion DB ID — 환경변수가 클라이언트 번들에 인라인되지 않는 경우를 대비해 직접 주입
+const NOTICE_DB_ID =
+  process.env.NEXT_PUBLIC_NOTION_NOTICE_DB_ID ?? "39b2b270472280a186fcec1129b557b0";
+
 export function useNoticesData() {
   const [noticesData, setNoticesData] = useState<NoticeData[]>([]);
 
   useEffect(() => {
+    // localStorage 캐시를 초기값으로 표시 — Notion 동기화 시 덮어씀
     setNoticesData(getLS<NoticeData[]>("localNoticesData", defaultNotices));
   }, []);
 
@@ -119,5 +118,5 @@ export function useNoticesData() {
     setLS("localNoticesData", data);
   }, []);
 
-  return { noticesData, setNoticesData: persist };
+  return { noticesData, setNoticesData: persist, noticeDbId: NOTICE_DB_ID };
 }
