@@ -101,6 +101,10 @@ export function useUsersData() {
   return { usersData, setUsersData: persist };
 }
 
+// 알림장 전용 Notion DB ID — 환경변수가 클라이언트 번들에 인라인되지 않는 경우를 대비해 직접 주입
+const NOTICE_DB_ID =
+  process.env.NEXT_PUBLIC_NOTION_NOTICE_DB_ID ?? "39b2b270472280a186fcec1129b557b0";
+
 export function useNoticesData() {
   const [noticesData, setNoticesData] = useState<NoticeData[]>([]);
 
@@ -114,5 +118,5 @@ export function useNoticesData() {
     setLS("localNoticesData", data);
   }, []);
 
-  return { noticesData, setNoticesData: persist };
+  return { noticesData, setNoticesData: persist, noticeDbId: NOTICE_DB_ID };
 }

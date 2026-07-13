@@ -32,7 +32,7 @@ export default function HomePage() {
   const { masteredKanas, toggle: toggleMastered, reset: resetMastered } = useMasteredKanas();
   const { notionConfig, save: saveNotionConfig, clear: clearNotionConfig } = useNotionConfig();
   const { usersData, setUsersData } = useUsersData();
-  const { noticesData, setNoticesData } = useNoticesData();
+  const { noticesData, setNoticesData, noticeDbId } = useNoticesData();
 
   const showToast = useCallback((message: string, type: ToastMessage["type"] = "success") => {
     toastIdRef.current += 1;
@@ -90,7 +90,7 @@ export default function HomePage() {
             noticesData={noticesData}
             usersData={usersData}
             notionApiKey={notionConfig.apiKey}
-            notionDbId={process.env.NEXT_PUBLIC_NOTION_NOTICE_DB_ID ?? ""}
+            notionDbId={noticeDbId}
             onAddNotice={handleAddNotice}
             onDeleteNotice={handleDeleteNotice}
             onSyncNotices={setNoticesData}
