@@ -50,6 +50,12 @@ export const kanaData: KanaData = {
     { h: null, k: null, r: null, ko: null, strokes: 0, type: "none" },
     { h: "よ", k: "ヨ", r: "yo", ko: "요", strokes: 3, type: "consonant", food: { name: "ようかん", koName: "양갱", romaji: "youkan", emoji: "🍫", tag: "디저트", sentence: "おばあちゃんはようかんがだいすき。", koSentence: "할머니는 양갱을 정말 좋아하신다." } },
 
+    { h: "ら", k: "ラ", r: "ra", ko: "라", strokes: 2, type: "consonant", food: { name: "らーめん", koName: "라멘", romaji: "raamen", emoji: "🍜", tag: "면류", sentence: "よるにらーめんをたべました。", koSentence: "밤에 라멘을 먹었습니다." } },
+    { h: "り", k: "リ", r: "ri", ko: "리", strokes: 2, type: "consonant", food: { name: "りんご", koName: "사과", romaji: "ringo", emoji: "🍎", tag: "과일", sentence: "あかいりんごをかいました。", koSentence: "빨간 사과를 샀습니다." } },
+    { h: "る", k: "ル", r: "ru", ko: "루", strokes: 1, type: "consonant", food: { name: "るいべ", koName: "얼린 회", romaji: "ruibe", emoji: "🐟", tag: "해산물", sentence: "ほっかいどうでるいべをたべる。", koSentence: "홋카이도에서 루이베를 먹는다." } },
+    { h: "れ", k: "レ", r: "re", ko: "레", strokes: 1, type: "consonant", food: { name: "れんこん", koName: "연근", romaji: "renkon", emoji: "🥔", tag: "채소", sentence: "れんこんのてんぷらがすきです。", koSentence: "연근 튀김을 좋아합니다." } },
+    { h: "ろ", k: "ロ", r: "ro", ko: "로", strokes: 3, type: "consonant", food: { name: "ろーるけーき", koName: "롤케이크", romaji: "roorukeeki", emoji: "🍰", tag: "디저트", sentence: "おやつにろーるけーきをたべる。", koSentence: "간식으로 롤케이크를 먹는다." } },
+
     { h: "わ", k: "ワ", r: "wa", ko: "와", strokes: 2, type: "consonant", food: { name: "わさび", koName: "고추냉이", romaji: "wasabi", emoji: "🌿", tag: "향신료", sentence: "すしにわさびをすこしいれます。", koSentence: "초밥에 고추냉이를 조금 넣습니다." } },
     { h: null, k: null, r: null, ko: null, strokes: 0, type: "none" },
     { h: null, k: null, r: null, ko: null, strokes: 0, type: "none" },
@@ -71,8 +77,8 @@ export const kanaData: KanaData = {
 
     { h: "ざ", k: "ザ", r: "za", ko: "자", strokes: 5, type: "voiced", food: { name: "ざるそば", koName: "판메밀국수", romaji: "zarusoba", emoji: "🍜", tag: "면류", sentence: "つめたいざるそばがおいしい。", koSentence: "시원한 판모밀이 맛있습니다." } },
     { h: "じ", k: "ジ", r: "ji", ko: "지", strokes: 3, type: "voiced", food: { name: "じんじゃーえーる", koName: "진저에일", romaji: "jinjaaeeru", emoji: "🥤", tag: "음료", sentence: "じんじゃーえーるをちゅうもんする。", koSentence: "진저에일을 주문합니다." } },
-    { h: "ず", k: "ズ", r: "zu", ko: "즈", strokes: 4, type: "voiced", food: { name: "ずわいがに", koName: "대게", romaji: "zuwaigani", emoji: "🦀", tag: "해산물", sentence: "ずわいがにはあまみがあっておいしい。", koSentence: "대게는 단맛이 돌아서 맛있습니다." } },
-    { h: "ぜ", k: "ゼ", r: "ze", ko: "제", strokes: 5, type: "voiced", food: { name: "ぜりー", koName: "젤리", romaji: "zerii", emoji: "🍮", tag: "디저트", sentence: "つめたいぜりーがたべたいな。", koSentence: "시원한 푸딩 젤리가 먹고 싶네요." } },
+    { h: "ず", k: "ズ", r: "zu", ko: "즈", strokes: 4, type: "voiced", food: { name: "ずわいがに", koName: "대게", romaji: "zuwaigani", emoji: "🦀", tag: "해산물", sentence: "ずわいがにはあ���みがあっておいしい。", koSentence: "대게는 단맛이 돌아서 맛있습니다." } },
+    { h: "ぜ", k: "ゼ", r: "ze", ko: "제", strokes: 5, type: "voiced", food: { name: "ぜりー", koName: "젤리", romaji: "zerii", emoji: "🍮", tag: "디저트", sentence: "つめたいぜりーがた���たいな。", koSentence: "시원한 푸딩 젤리가 먹고 싶네요." } },
     { h: "ぞ", k: "ゾ", r: "zo", ko: "조", strokes: 3, type: "voiced", food: { name: "ぞうすい", koName: "죽", romaji: "zousui", emoji: "🍲", tag: "요리", sentence: "おなかにやさしいぞうすい。", koSentence: "소화에 좋은 따뜻한 죽." } },
 
     { h: "だ", k: "ダ", r: "da", ko: "다", strokes: 6, type: "voiced", food: { name: "だんご", koName: "경단 떡", romaji: "dango", emoji: "🍡", tag: "디저트", sentence: "おちゃといっしょにだんごをたべる。", koSentence: "차를 마시면서 경단을 먹는다." } },
