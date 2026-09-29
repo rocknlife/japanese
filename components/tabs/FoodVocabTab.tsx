@@ -4,6 +4,15 @@ import { useState, useMemo } from "react";
 import type { FoodFilter, ScriptType } from "@/lib/types";
 import { allKanaList } from "@/lib/kanaData";
 import { speakText, highlightCharInFood } from "@/lib/utils";
+import { matchScore, kanaToHangul } from "@/lib/korean";
+import TextbookVocab from "@/components/tabs/vocab/TextbookVocab";
+
+type VocabMode = "textbook" | "food";
+
+const MODES: { id: VocabMode; label: string; icon: string }[] = [
+  { id: "textbook", label: "교재 기본 단어", icon: "fa-book-open" },
+  { id: "food", label: "음식 연상 단어", icon: "fa-utensils" },
+];
 
 const FILTERS: { id: FoodFilter; label: string }[] = [
   { id: "all", label: "전체" },
@@ -16,6 +25,32 @@ interface FoodVocabTabProps {
 }
 
 export default function FoodVocabTab({ masteredKanas }: FoodVocabTabProps) {
+  const [mode, setMode] = useState<VocabMode>("textbook");
+
+  return (
+    <section className="flex flex-col gap-4">
+      <div role="tablist" aria-label="단어장 종류" className="bg-slate-100 p-1 rounded-2xl flex gap-1 w-full sm:w-fit">
+        {MODES.map(({ id, label, icon }) => (
+          <button
+            key={id}
+            role="tab"
+            aria-selected={mode === id}
+            onClick={() => setMode(id)}
+            className={`flex-1 sm:flex-none px-4 py-2 text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 ${
+              mode === id ? "bg-white text-amber-600 shadow-sm" : "text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            <i className={`fa-solid ${icon} text-[11px]`}></i>
+            {label}
+          </button>
+        ))}
+      </div>
+      {mode === "textbook" ? <TextbookVocab /> : <FoodVocab masteredKanas={masteredKanas} />}
+    </section>
+  );
+}
+
+function FoodVocab({ masteredKanas }: FoodVocabTabProps) {
   const [filter, setFilter] = useState<FoodFilter>("all");
   const [scriptType, setScriptType] = useState<ScriptType>("hiragana");
   const [search, setSearch] = useState("");
@@ -25,14 +60,18 @@ export default function FoodVocabTab({ masteredKanas }: FoodVocabTabProps) {
       if (!item.food) return false;
       if (filter === "vowel" && item.type !== "vowel") return false;
       if (filter === "consonant" && item.type === "vowel") return false;
-      if (search) {
-        const q = search.toLowerCase();
+      if (search.trim()) {
         return (
-          item.h?.includes(q) ||
-          item.k?.includes(q) ||
-          item.r?.includes(q) ||
-          item.food.name.includes(q) ||
-          item.food.koName.includes(q)
+          matchScore(search, [
+            item.h,
+            item.k,
+            item.r,
+            item.ko,
+            item.food.name,
+            item.food.koName,
+            item.food.romaji,
+            kanaToHangul(item.food.name),
+          ]) !== Infinity
         );
       }
       return true;
@@ -40,7 +79,7 @@ export default function FoodVocabTab({ masteredKanas }: FoodVocabTabProps) {
   }, [filter, search]);
 
   return (
-    <section className="space-y-4">
+    <div className="flex flex-col gap-4">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
         <div>
@@ -89,7 +128,8 @@ export default function FoodVocabTab({ masteredKanas }: FoodVocabTabProps) {
           <div className="relative">
             <input
               type="text"
-              placeholder="글자, 단어 검색..."
+              placeholder="한글·일본어 검색..."
+              aria-label="음식 단어 검색"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-7 pr-3 py-1.5 text-xs border border-slate-200 rounded-xl outline-none focus:border-amber-400 transition w-36"
@@ -179,6 +219,6 @@ export default function FoodVocabTab({ masteredKanas }: FoodVocabTabProps) {
           <p className="text-sm font-bold text-slate-400">검색 결과가 없습니다.</p>
         </div>
       )}
-    </section>
+    </div>
   );
 }
